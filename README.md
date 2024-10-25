@@ -1,4 +1,4 @@
-# TimeJellyBeam Java-Portfolio
+# Time Jelly Beam Java-Portfolio
 A platformer game developed in Java using the Model-View-Presenter pattern and Object-Oriented Programming. The game uses logical and graphical threads to enhance performance, ensuring smooth rendering of moving objects. It features background ambiance, sprites, and object collision detection, along with keyboard-based events. The main character's position is saved every 10 seconds, and screenshots are automatically taken every 10 seconds, which can be viewed in the screenshots section.
 
 ## Author
@@ -14,5 +14,5 @@ A platformer game developed in Java using the Model-View-Presenter pattern and O
 If you'd like to hire me, feel free to contact me at DiegoCepeda.Dev@gmail.com
 
 ## Licence 
-MIT Public Licence V3.0
-No puede usarse comercvialmente
+MIT Public License V3.0 
+Cannot be used commercially
