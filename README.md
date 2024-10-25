@@ -11,7 +11,7 @@ A platformer game developed in Java using the Model-View-Presenter pattern and O
 - Compile and run the main file in your IDE or from the terminal.
 
 ## Hiring
-If you'd like to hire me, feel free to contact me at DiegoCepeda.dev@gmail.com
+If you'd like to hire me, feel free to contact me at DiegoCepeda.Dev@gmail.com
 
 ## Licence 
 MIT Public Licence V3.0
