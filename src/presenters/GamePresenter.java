@@ -168,14 +168,28 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 			int cont=0;
 			int seg=0;
 			int transitionSlowdown= 10;
+			long lastTickNanos = System.nanoTime();
+			long accumulatedNanos = 0L;
 			public void actionPerformed(ActionEvent actionEvent) {
+				long now = System.nanoTime();
+				long elapsedNanos = now - lastTickNanos;
+				lastTickNanos = now;
+
 				game.getHero().setPause(game.isPause());
 				game.setPanelScreenShot(window.getPanel());
 				addScrenShot(game.isNewScreenshot());
 				if(!game.isPause()) {
 					cont++;
+					accumulatedNanos += elapsedNanos;
+					if(accumulatedNanos >= 1_000_000_000L) {
+						accumulatedNanos -= 1_000_000_000L;
+						seg++;
+						if(game.getCurrentScene().equals("game")) {
+							game.setTime(game.getTime()-1);
+							window.setTime(game.getTime());
+						}
+					}
 				}
-					seg = timeController(cont,seg);
 
 					try {
 						loadScene(cont, seg, transitionSlowdown);
@@ -192,23 +206,6 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 			}
 		});
 		gameLoop.start();
-	}
-	private int timeController(int cont,int inputSeconds) {
-		int ouputSeconds=inputSeconds;
-//		if(cont%300==0) {
-		if(cont%280==0) {
-//		if(cont%70==0) {
-			ouputSeconds++;
-		}
-		if(cont%300==0) {
-//		if(cont%50==0) {
-//			ouputSeconds++;
-			if(game.getCurrentScene().equals("game")) {
-				game.setTime(game.getTime()-1);
-			window.setTime(game.getTime());
-			}
-		}
-		return ouputSeconds;
 	}
 	private void gameMechanics(int cont) throws IOException {
 		int extraTime=2;
