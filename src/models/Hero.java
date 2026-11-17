@@ -188,22 +188,31 @@ public class Hero extends GameObject{
 	}
 
 	private void timer() {
-//		int Herospeed = 25;//slow
-//		int Herospeed = 50;//slow
-//		int Herospeed = 12;
-		int Herospeed = 1;//------------------------
-		Timer animationTimer = new Timer(Herospeed, new ActionListener() {
+		final int heroTicksPerSecond = 300;
+		final long nanosPerHeroTick = 1_000_000_000L / heroTicksPerSecond;
+		final long maxFrameElapsedNanos = 100_000_000L;
+		Timer animationTimer = new Timer(16, new ActionListener() {
 			int keysSum =0;
+			long lastTickNanos = System.nanoTime();
+			long accumulatedNanos = 0L;
 	    	@Override
 			public void actionPerformed(ActionEvent e) {
+	    		long now = System.nanoTime();
+	    		long elapsedNanos = Math.min(now - lastTickNanos, maxFrameElapsedNanos);
+	    		lastTickNanos = now;
+
 	    		keysSum = initKeySum();
 	    		if(!pause) {
+	    			accumulatedNanos += elapsedNanos;
+	    			while(accumulatedNanos >= nanosPerHeroTick) {
+	    				accumulatedNanos -= nanosPerHeroTick;
 						try {
 							graphicMovement(keysSum);
 						} catch (IOException e1) {
 							e1.printStackTrace();
 						}
-	        	logicalMovement(keysSum);
+	        			logicalMovement(keysSum);
+	    			}
 	    		}
 			}
 		});

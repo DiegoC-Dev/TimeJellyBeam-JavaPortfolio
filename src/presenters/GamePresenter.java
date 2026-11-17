@@ -38,6 +38,9 @@ import java.util.Set;
 public class GamePresenter implements KeyListener,MouseListener, MouseMotionListener{
 
     private static final int[] PRELUDE_SCENE_DURATIONS = new int[] {2, 9, 9, 12, 9, 4, 4};
+    private static final int ANIMATION_TICKS_PER_SECOND = 500;
+    private static final long NANOS_PER_ANIMATION_TICK = 1_000_000_000L / ANIMATION_TICKS_PER_SECOND;
+    private static final long MAX_FRAME_ELAPSED_NANOS = 100_000_000L;
 
     private Game game;
     private GameWindow window;
@@ -168,20 +171,20 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		return new Sprite(sprite,path);
 	}
 	private void mainTimer() {
-		Timer gameLoop = new Timer(1, new ActionListener(){
+		Timer gameLoop = new Timer(16, new ActionListener(){
 			int cont=0;
 			int transitionSlowdown= 10;
 			long lastTickNanos = System.nanoTime();
+			long tickAccumulatedNanos = 0L;
 			public void actionPerformed(ActionEvent actionEvent) {
 				long now = System.nanoTime();
-				long elapsedNanos = now - lastTickNanos;
+				long elapsedNanos = Math.min(now - lastTickNanos, MAX_FRAME_ELAPSED_NANOS);
 				lastTickNanos = now;
 
 				game.getHero().setPause(game.isPause());
 				game.setPanelScreenShot(window.getPanel());
 				addScrenShot(game.isNewScreenshot());
 				if(!game.isPause()) {
-					cont++;
 					accumulatedNanos += elapsedNanos;
 					if(accumulatedNanos >= 1_000_000_000L) {
 						accumulatedNanos -= 1_000_000_000L;
@@ -189,6 +192,14 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 						if(game.getCurrentScene().equals("game")) {
 							game.setTime(game.getTime()-1);
 							window.setTime(game.getTime());
+						}
+					}
+					tickAccumulatedNanos += elapsedNanos;
+					while(tickAccumulatedNanos >= NANOS_PER_ANIMATION_TICK) {
+						tickAccumulatedNanos -= NANOS_PER_ANIMATION_TICK;
+						cont++;
+						if(game.getCurrentScene().equals("game")) {
+							game.setEnemyMovements(cont);
 						}
 					}
 				}
@@ -399,7 +410,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 				}
 				game.setCurrentTimeScene(seg);
 			}
-			placeScene(seg,cont,30,transitionInput,
+			placeScene(seg,cont,20,transitionInput,
 					game.getCurrentTimeScene(),game.getPlaceOpacity(),game.getEndScene(),
 					toArrayInteger(game.getSceneOBjectGroup().getIndexLlist()),transitionSlowdown,
 					toArrayPoint(game.getSceneOBjectGroup().getCoordinates()));
