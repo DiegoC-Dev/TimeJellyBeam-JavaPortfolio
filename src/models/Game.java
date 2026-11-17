@@ -8,8 +8,10 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -19,6 +21,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -45,6 +48,7 @@ public class Game{
 	private long clipTime;
 	private Clip clipMenu;
 	private long clipTimeMenu;
+	private Clip clipPrelude;
 	private int transitionStarTime;
 	private String [][] TextMatrix;
 	private int placeOpacity;
@@ -280,28 +284,71 @@ public class Game{
 	public ArrayList<GameObject> getGameObjectList() {
 		return gameObjectList;
 	}
-	public void playBackgroundSound() {
-		try {
-			clip = AudioSystem.getClip();
-//    				AudioInputStream inputStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream("/Inicio.wav"));
-			AudioInputStream inputStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream("/game_music .wav"));
-			clip.open(inputStream);
-			clip.start();
-		} catch (LineUnavailableException |UnsupportedAudioFileException | IOException e) {
-			e.printStackTrace();
+	private AudioInputStream openAudioStream(String resourcePath) throws UnsupportedAudioFileException, IOException {
+		InputStream rawStream = getClass().getResourceAsStream(resourcePath);
+		if(rawStream == null) {
+			throw new IOException("Audio resource not found: " + resourcePath);
+		}
+		return AudioSystem.getAudioInputStream(new BufferedInputStream(rawStream));
+	}
+	private void stopClip(Clip c) {
+		if(c != null) {
+			c.stop();
+			c.close();
 		}
 	}
-	public void playMenuSound() {
+	public void stopBackgroundSound() {
+		stopClip(clip);
+		clip = null;
+	}
+	public void stopMenuSound() {
+		stopClip(clipMenu);
+		clipMenu = null;
+	}
+	private Clip openLoopingClip(String resourcePath) {
 		try {
-			clipMenu = AudioSystem.getClip();
-    				AudioInputStream inputStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream("/menu.wav"));
-//			AudioInputStream inputStream = AudioSystem.getAudioInputStream(getClass().getResourceAsStream("/game_music .wav"));
-    				clipMenu.open(inputStream);
-    				clipMenu.start();
-//    				clip.loop(Clip.LOOP_CONTINUOUSLY);
+			Clip newClip = AudioSystem.getClip();
+			AudioInputStream inputStream = openAudioStream(resourcePath);
+			newClip.open(inputStream);
+			newClip.loop(Clip.LOOP_CONTINUOUSLY);
+			newClip.start();
+			return newClip;
 		} catch (LineUnavailableException |UnsupportedAudioFileException | IOException e) {
 			e.printStackTrace();
+			return null;
 		}
+	}
+	private void setClipVolume(Clip c, float linear) {
+		if(c != null && c.isOpen() && c.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+			FloatControl gain = (FloatControl) c.getControl(FloatControl.Type.MASTER_GAIN);
+			float db = (linear <= 0.0001f) ? gain.getMinimum() : (float) (20.0 * Math.log10(linear));
+			gain.setValue(Math.max(gain.getMinimum(), Math.min(gain.getMaximum(), db)));
+		}
+	}
+	public void fadePreludeVolume(float linear) {
+		setClipVolume(clipPrelude, linear);
+	}
+	public void fadeMenuVolume(float linear) {
+		setClipVolume(clipMenu, linear);
+	}
+	public void fadeBackgroundVolume(float linear) {
+		setClipVolume(clip, linear);
+	}
+	public void stopPreludeSound() {
+		stopClip(clipPrelude);
+		clipPrelude = null;
+	}
+	public void playPreludeSound() {
+		stopPreludeSound();
+		clipPrelude = openLoopingClip("/prelude.wav");
+	}
+	public void playBackgroundSound() {
+		stopBackgroundSound();
+		clip = openLoopingClip("/game_music .wav");
+	}
+	public void playMenuSound() {
+		stopMenuSound();
+		clipMenu = openLoopingClip("/menu.wav");
 	}
 	
 	public void soundBackdgoundPause(int key){

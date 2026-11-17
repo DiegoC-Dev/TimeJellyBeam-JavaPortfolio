@@ -65,8 +65,6 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		fillSpriteList();
 		initPrelude();
 		game.writeData();
-		game.playMenuSound();
-//		game.playBackgroundSound();
 	}
 	private void viewData() {
 		window.updateHero(game.getHero());
@@ -310,6 +308,10 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 			game.setCurrentTimeScene(timeNextScene);
 			game.setCurrentScene(nextScene);
 			game.setChangeScene(nextScene);
+			if(nextScene.equals("menu")) {
+				game.stopPreludeSound();
+				game.playMenuSound();
+			}
 		}
 		
 		for (int i = 0; i < scene.length; i++) {
@@ -348,7 +350,12 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 						new Point[] {new Point(85, 196),new Point(-30,0)},
 						new Point[] {new Point(185, 134),new Point(-30,0)},
 						new Point[] {new Point(0,0)},new Point[] {new Point(0,0)}};	
-						int[] slowDownImage = new int[] {1,30,30,80,1,1,1};				
+						int[] slowDownImage = new int[] {1,30,30,80,1,1,1};
+						int fadeStart = scene[scene.length-2][0];
+						int fadeEnd = scene[scene.length-1][2];
+						if(seg >= fadeStart) {
+							game.fadePreludeVolume(computeFadeOutVolume(fadeStart, fadeEnd));
+						}
 						createAutomaticScene(cont, seg, transitionSlowdown,
 								scene, indexSpriteList, positionImages, slowDownImage,nextScene);
 //			}
@@ -363,12 +370,15 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 			int[][] indexSpriteList =new int[][]{new int[]{34}};
 			Point[][] positionImages = new Point[][] {new Point[] {new Point(0,0)}};	
 			int[] slowDownImage = new int[] {1};
+			game.fadeMenuVolume(computeFadeOutVolume(scene[0][0], scene[0][2]));
 			
 			createAutomaticScene(cont, seg, transitionSlowdown,
 					scene, indexSpriteList, positionImages, slowDownImage,nextScene);
 			if(seg==scene[scene.length-1][2]) {
 				window.setInitGame(true);
 				game.deleteObjectsScene();
+				game.stopMenuSound();
+				game.playBackgroundSound();
 			}
 		}
 	}
@@ -386,6 +396,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 				game.setCurrentScene("prelude");
 				game.setCurrentTimeScene(seg);
 				window.setFinishLoad(true);
+				game.playPreludeSound();
 			}
 			placeScene(seg,cont,slowDownImage,transitionInput,
 					sceneStart,game.getPlaceOpacity(),game.getEndScene(),
@@ -421,11 +432,14 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 				boolean transitionInput = true;
 				if(game.getChangeScene().equals("game")) {
 					placeEndScene(seg);
+				} else if(game.getChangeScene().equals("menu")) {
+					game.fadeBackgroundVolume(computeFadeOutVolume(game.getEndScene()-3, game.getEndScene()));
 				}
 				if(seg==game.getEndScene()){
 					window.setInitGame(false);
 					game.setCurrentTimeScene(seg);
 					if(game.getChangeScene().equals("victory")) {						
+						game.stopBackgroundSound();
 						game.setCurrentScene("victory");
 						window.win(true);
 						game.winObjectsScene();
@@ -435,6 +449,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 						game.restartGems();
 					}
 					if(game.getChangeScene().equals("defeat")) {						
+						game.stopBackgroundSound();
 						game.setCurrentScene("defeat");
 //						window.defeat(true);
 						game.defeatObjectsScene();
@@ -444,9 +459,11 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 						game.restartGems();
 					}
 					if(game.getChangeScene().equals("menu")) {
+						game.stopBackgroundSound();
 						game.setCurrentScene("menu");
 						game.setCurrentTimeScene(seg);
 						game.menuObjectsScene();
+						game.playMenuSound();
 					}
 				}
 				placeScene(seg,cont,1,transitionInput,
@@ -467,6 +484,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 				game.menuObjectsScene();
 				window.win(false);
 				game.restartHero();
+				game.playMenuSound();
 			}
 			placeScene(seg,cont,1,transitionInput,
 					game.getCurrentTimeScene(),game.getPlaceOpacity(),game.getEndScene(),
@@ -486,6 +504,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 				game.menuObjectsScene();
 //				window.defeat(false);f
 				game.restartHero();
+				game.playMenuSound();
 			}
 			placeScene(seg,cont,1,transitionInput,
 					game.getCurrentTimeScene(),game.getPlaceOpacity(),game.getEndScene(),
@@ -532,6 +551,15 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		new GamePresenter();
 	}    
     
+	private float computeFadeOutVolume(int startSeg, int endSeg) {
+		if(endSeg <= startSeg) {
+			return 1.0f;
+		}
+		float exactSeg = seg + (accumulatedNanos / 1_000_000_000.0f);
+		float progress = (exactSeg - startSeg) / (endSeg - startSeg);
+		return Math.max(0.0f, Math.min(1.0f, 1.0f - progress));
+	}
+
 	private void advancePreludeScene() {
 		if(!game.getCurrentScene().equals("prelude")) {
 			return;
@@ -558,6 +586,8 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		game.setCurrentScene("menu");
 		game.setChangeScene("menu");
 		accumulatedNanos = 0L;
+		game.stopPreludeSound();
+		game.playMenuSound();
 	}
 
 	@Override
