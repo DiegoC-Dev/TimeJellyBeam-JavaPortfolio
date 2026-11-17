@@ -138,8 +138,11 @@ public class Hero extends GameObject{
 						newX =((this.y-coordinates.getY())<0)?((irregular==8)?(newX+1):(newX-1)):((irregular==10)?(newX-1):(newX+1));
 					else if((this.y-coordinates.getY())==0)
 						newY=((this.x-coordinates.getX())<0)?((irregular==10)?(newY+1):(newY-1)):((irregular==8)?(newY-1):(newY+1));
-						newY=(loop>20)?(int)this.y:newY;
-						newX=(loop>20)?(int)this.x:newX;
+					if(loop>20) {
+						newY=(int)this.y;
+						newX=(int)this.x;
+						break;
+					}
 				collision=detectCollision(newX, newY);
 				}
 				saveCoord(coordinates, newY, newX);					
