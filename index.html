@@ -62,12 +62,30 @@
             border-radius: 10px;
             overflow: hidden;
         }
+        #start-btn {
+            display: none;
+            margin-top: 18px;
+            padding: 12px 28px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #ef3081, #00a78e);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(239, 48, 129, 0.45);
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+        #start-btn:hover {
+            transform: scale(1.04);
+        }
     </style>
 </head>
 <body>
     <div id="loading">
         <div class="jelly-loader"></div>
-        <p>Cargando TimeJellyBeam en el navegador...</p>
+        <p id="loading-text">Cargando TimeJellyBeam en el navegador...</p>
+        <button id="start-btn" type="button">Iniciar juego (con sonido)</button>
     </div>
     <div id="game-wrapper"></div>
 
@@ -113,7 +131,20 @@
 
                 await cheerpjInit();
                 cheerpjCreateDisplay(w, h, wrapper);
+
                 const loading = document.getElementById('loading');
+                const loadingText = document.getElementById('loading-text');
+                const startBtn = document.getElementById('start-btn');
+                if (loadingText) loadingText.textContent = 'Listo para iniciar';
+                if (startBtn) {
+                    startBtn.style.display = 'inline-block';
+                    await new Promise((resolve) => {
+                        startBtn.addEventListener('click', () => {
+                            unlockWebAudio();
+                            resolve();
+                        }, { once: true });
+                    });
+                }
                 if (loading) loading.style.display = 'none';
                 await cheerpjRunJar("/app/TimeJellyBeam.jar");
             } catch (err) {
