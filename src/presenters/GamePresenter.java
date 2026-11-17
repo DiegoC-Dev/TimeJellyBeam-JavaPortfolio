@@ -646,21 +646,32 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 				return;
 			}
 		}
-		key = key==37?key+10:key;
-		game.setPause(key==80 && !game.isPause()?true:key==80 && game.isPause()?false:game.isPause());
-		if(game.isPause()) {
-			game.pauseObjectsScene();
+		if(game.getCurrentScene().equals("screenShots")) {
+			if(key == KeyEvent.VK_RIGHT) {
+				game.screenShotObjectsSceneNext();
+			} else if(key == KeyEvent.VK_LEFT) {
+				game.screenShotObjectsSceneBack();
+			} else if(key == KeyEvent.VK_ESCAPE) {
+				game.setChangeScene("menu");
+			}
+			return;
 		}
-		else
-			game.deleteObjectsScene();
+		key = key==37?key+10:key;
+		if(game.getCurrentScene().equals("game") && !game.isWin()) {
+			game.setPause(key==80 && !game.isPause()?true:key==80 && game.isPause()?false:game.isPause());
+			if(game.isPause()) {
+				game.pauseObjectsScene();
+			}
+			else
+				game.deleteObjectsScene();
+			if(!game.isPause()) {
+				game.getHero().receiveKeys(key);
+			}
+		}
 		if(key==73 && game.getCurrentScene().equals("load")) {
 //		if(key==27 && game.getCurrentScene().equals("load")) {
 			game.setSkipe(false);
 //			System.out.println("activo");
-		}
-	
-		if(!game.isPause() && game.getCurrentScene().equals("game")&& !game.isWin()) {
-			game.getHero().receiveKeys(key);
 		}
 //		game.soundBackdgoundPause(key);/////////////----------------------------------------------------------
 	}
