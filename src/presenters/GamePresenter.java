@@ -55,7 +55,6 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
     private int cachedIntroStart = -1;
     
     public GamePresenter(){
-    	System.out.println("vrs 7.10");
         try {
         	window = new GameWindow(this);
         	game = new Game();
@@ -74,15 +73,11 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		Thread loader = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				System.out.println("SpriteLoader started");
 				try {
 					fillSpriteList();
 					spritesReady = true;
-					System.out.println("Sprites ready");
 					loadScreenshots();
-					System.out.println("Screenshots ready");
 				} catch (Throwable t) {
-					System.err.println("SpriteLoader failed:");
 					t.printStackTrace();
 				}
 			}
@@ -156,12 +151,15 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		for (int i = 0; i < screenCount; i++) {
 			window.addSpriteList(createSprite("src/screenShoots/screenshot "+(i+1)+".png"));	
 			game.addSpriteSizeList(extractSpriteSize("src/screenShoots/screenshot "+(i+1)+".png"));
+			game.addSpriteStep(1);
 		}
 	}
 	private void addSpriteList(String path) throws IOException {
 		Sprite sprite = createSprite(path);
 		window.addSpriteList(sprite);
 		game.addSpriteSizeList(sprite.getSprite().size());
+		int step = isGif(path) ? ResourcePath.getGifStep(ResourcePath.countFolderFiles(path)) : 1;
+		game.addSpriteStep(step);
 	}
 	private void addScrenShot(boolean screenShoot) {
 		try {
@@ -187,7 +185,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		ArrayList<BufferedImage> sprite = new ArrayList<BufferedImage>();
 		if(isGif(path)){
 			int count = ResourcePath.countFolderFiles(path);
-			int step = (ResourcePath.isCheerpJ() && count >= 24) ? ((count >= 40) ? 3 : 2) : 1;
+			int step = ResourcePath.getGifStep(count);
 			for (int i = 0; i < count; i += step) {
 				try (InputStream in = ResourcePath.openStream(path+"/frame-"+(i+1)+".gif")) {
 					sprite.add(ImageIO.read(in));
@@ -219,9 +217,6 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 					if(accumulatedNanos >= 1_000_000_000L) {
 						accumulatedNanos -= 1_000_000_000L;
 						seg++;
-						if(seg % 5 == 0) {
-							System.out.println("tick seg=" + seg + " scene=" + game.getCurrentScene());
-						}
 						if(game.getCurrentScene().equals("game")) {
 							game.setTime(game.getTime()-1);
 							window.setTime(game.getTime());
@@ -342,7 +337,6 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 //			timeNextScene= seg;
 //		}
 		if(seg>=timeNextScene) {
-			System.out.println("Leaving " + game.getCurrentScene() + " -> " + nextScene + " at seg=" + seg + " (timeNextScene=" + timeNextScene + ")");
 			game.setCurrentTimeScene(seg);
 			game.setCurrentScene(nextScene);
 			game.setChangeScene(nextScene);
@@ -384,7 +378,6 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 				int [][] scene = cachedPreludeScene;
 				if(seg==timeStart) {
 					game.setEndPrelude(scene[scene.length-1][2]);
-					System.out.println("Prelude range: " + timeStart + ".." + scene[scene.length-1][2]);
 				}
 				int[][] indexSpriteList =new int[][] {new int[]{0,13},new int[]{1,14},new int[]{2,15},new int[]{3,16},
 					new int[]{4,17},new int[]{18},new int[]{19}};
@@ -443,7 +436,6 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 			game.setPlaceOpacity(seg + 2);
 			game.setEndScene(seg + 4);
 		} else if(seg>=game.getEndScene()){
-			System.out.println("Entering prelude at seg=" + seg);
 			game.setCurrentScene("prelude");
 			game.setCurrentTimeScene(seg);
 			window.setFinishLoad(true);
@@ -656,7 +648,6 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		}
 		key = key==37?key+10:key;
 		game.setPause(key==80 && !game.isPause()?true:key==80 && game.isPause()?false:game.isPause());
-		System.out.println(key);
 		if(game.isPause()) {
 			game.pauseObjectsScene();
 		}
@@ -735,8 +726,6 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 			else if(game.getNameObjectScene(logicalEvent).equals("main menu win")){				
 				game.setChangeScene("menu");
 			}
-			
-			System.out.println(game.getNameObjectScene(logicalEvent));
 		}
 	}
 	@Override

@@ -57,6 +57,10 @@ public class ResourcePath {
 		return !new File("src").isDirectory() && new File("/app/TimeJellyBeam.jar").exists();
 	}
 
+	public static int getGifStep(int count) {
+		return (isCheerpJ() && count >= 24) ? ((count >= 40) ? 3 : 2) : 1;
+	}
+
 	public static int countFolderFiles(String path) {
 		File local = new File(path);
 		if (local.isDirectory()) {

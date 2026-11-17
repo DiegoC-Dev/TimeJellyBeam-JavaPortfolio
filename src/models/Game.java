@@ -71,6 +71,7 @@ public class Game{
 	private boolean save;
 	private boolean screenShot;
 	private ArrayList<Integer> spriteSizeList;
+	private ArrayList<Integer> spriteStepList;
 	private int loadSize;
 	private boolean skipe;
 	private int endPrelude;
@@ -82,6 +83,7 @@ public class Game{
 		virtualButonList = new ArrayList<Rectangle2D>();
 		createVirtualButtons();
 		spriteSizeList = new ArrayList<Integer>();
+		spriteStepList = new ArrayList<Integer>();
 		actualScreen=spriteSizeList.size()-1;
 		endScene=-1;
     	read();
@@ -478,7 +480,8 @@ public class Game{
 			return new IndexColection(0, 0);
 		}
 		int safeIndex = (indexSpriteList >= 0 && indexSpriteList < spriteSizeList.size()) ? indexSpriteList : 0;
-		int gifTime = time / slowdown;
+		int step = (safeIndex < spriteStepList.size()) ? spriteStepList.get(safeIndex) : 1;
+		int gifTime = time / Math.max(1, slowdown * step);
 		int size = Math.max(1, spriteSizeList.get(safeIndex));
 		int imageNumber = gifTime % size;
 		return new IndexColection(safeIndex, imageNumber);
@@ -666,6 +669,9 @@ public class Game{
 	}
 	public void addSpriteSizeList(int size){
 		spriteSizeList.add(size);
+	}
+	public void addSpriteStep(int step){
+		spriteStepList.add(step);
 	}
 	public void addLoadSize(int size){
 		loadSize =size;
