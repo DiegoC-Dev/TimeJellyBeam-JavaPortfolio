@@ -155,6 +155,9 @@ public class GamePanel extends JPanel {
 		}
 	}
 	private void drawAnimatedLoad(Graphics graphics) {
+		if(loadIndex == null || loadSprite == null || positionImageLoad == null) {
+			return;
+		}
 		int imageIndex;
 		BufferedImage image;
 			imageIndex= loadIndex.getImageIndex();
@@ -264,30 +267,7 @@ public class GamePanel extends JPanel {
     	this.gemList = gemList;
     }
     private void swingWorker(){
-		SwingWorker<Integer, Integer> worker = new SwingWorker<Integer, Integer>(){
-			boolean condition = false;
-			int wait = 1000000;
-			int cont= 0;
-			@Override
-			protected Integer doInBackground() throws Exception {
-				while(!condition) {
-						cont++;
-						if(cont%wait==0) {
-						repaint();
-//							repaint((int)hero.getX()-40,(int) hero.getY()-40, 
-//									(int)(hero.getX()+hero.getDiameter())+30,
-//									(int)(hero.getX()+hero.getDiameter())+30);
-						}
-				}
-				return 0;
-			}
-			@Override
-			protected void process(List<Integer> chunks) {
-			}
-			@Override
-			protected void done() {
-			}
-		};worker.execute();
+		new javax.swing.Timer(16, e -> repaint()).start();
 	}
     public void setWin(boolean win) {
     	finalTime = initTime-time;
