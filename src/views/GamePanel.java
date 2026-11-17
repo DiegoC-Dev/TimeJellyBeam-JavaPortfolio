@@ -98,7 +98,7 @@ public class GamePanel extends JPanel {
     	int drawH = (int) Math.round(Constants.LOGICAL_HEIGHT * scale);
     	int offsetX = (panelW - drawW) / 2;
     	int offsetY = (panelH - drawH) / 2;
-    	g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    	g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
     	g2d.drawImage(offscreenBuffer, offsetX, offsetY, drawW, drawH, null);
     	getToolkit().sync();    		
     }

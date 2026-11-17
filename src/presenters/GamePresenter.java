@@ -197,7 +197,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		return new Sprite(sprite,path);
 	}
 	private void mainTimer() {
-		Timer gameLoop = new Timer(33, new ActionListener(){
+		Timer gameLoop = new Timer(40, new ActionListener(){
 			int cont=0;
 			int transitionSlowdown= 10;
 			long lastTickNanos = System.nanoTime();
@@ -215,6 +215,9 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 					if(accumulatedNanos >= 1_000_000_000L) {
 						accumulatedNanos -= 1_000_000_000L;
 						seg++;
+						if(seg % 5 == 0) {
+							System.out.println("tick seg=" + seg + " scene=" + game.getCurrentScene());
+						}
 						if(game.getCurrentScene().equals("game")) {
 							game.setTime(game.getTime()-1);
 							window.setTime(game.getTime());
