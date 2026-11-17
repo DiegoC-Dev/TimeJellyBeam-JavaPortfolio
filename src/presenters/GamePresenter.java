@@ -162,11 +162,6 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		game.addSpriteSizeList(sprite.getSprite().size());
 		int step = isGif(path) ? ResourcePath.getGifStep(ResourcePath.countFolderFiles(path)) : 1;
 		game.addSpriteStep(step);
-		try {
-			Thread.sleep(550);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
 		loadedSpritesCount++;
 		window.setLoadProgress(Math.min(100, (loadedSpritesCount * 100) / TOTAL_SPRITES));
 	}
