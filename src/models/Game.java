@@ -196,7 +196,10 @@ public class Game{
 		hero.setXBeforeJump((int)gameData.getxBeforeJump());
 		hero.setYBeforeJump((int)gameData.getyBeforeJump());
 		hero.setFall(Boolean.parseBoolean(gameData.getFall()));
-		BufferedImage img = ImageIO.read(ResourcePath.resolve("src/img/jelly "+gameData.getImage()+".png"));
+		BufferedImage img;
+		try (InputStream in = ResourcePath.openStream("src/img/jelly "+gameData.getImage()+".png")) {
+			img = ImageIO.read(in);
+		}
 		hero.setSubSprite( img.
 				getSubimage((int)gameData.getxSpriteCoords(),(int)gameData.getySpriteCoords(),
 						(int)gameData.getWidthSpriteCoords(),(int)gameData.getHeightSpriteCoords()));
@@ -465,7 +468,9 @@ public class Game{
 		int count = ResourcePath.countFolderFiles(path);
 		gifTime = (time%slowdown==0)?time/slowdown:(int)(time/slowdown);
 		int imageNumber=(count > 0) ? (gifTime % count)+1 : 1;
-		img = ImageIO.read(ResourcePath.resolve(path+"/frame-"+imageNumber+".gif"));
+		try (InputStream in = ResourcePath.openStream(path+"/frame-"+imageNumber+".gif")) {
+			img = ImageIO.read(in);
+		}
 		return img;
 	}
 	public IndexColection createIdexCollection(int time,int slowdown,int indexSpriteList) throws IOException {

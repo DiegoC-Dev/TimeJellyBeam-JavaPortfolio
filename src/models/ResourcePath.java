@@ -1,6 +1,9 @@
 package models;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +38,19 @@ public class ResourcePath {
 			}
 		}
 		return file;
+	}
+
+	public static InputStream openStream(String path) throws IOException {
+		File local = new File(path);
+		if (local.exists()) {
+			return new FileInputStream(local);
+		}
+		String normalized = path.startsWith("./") ? path.substring(2) : path;
+		InputStream cp = ResourcePath.class.getResourceAsStream("/" + normalized);
+		if (cp != null) {
+			return cp;
+		}
+		return new FileInputStream(new File("/app/" + normalized));
 	}
 
 	public static int countFolderFiles(String path) {

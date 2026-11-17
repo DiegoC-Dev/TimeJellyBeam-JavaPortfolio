@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -65,7 +67,7 @@ public class FileManagerJson {
 	public static ArrayList<GameData> read() {
 		ArrayList<GameData> list = new ArrayList<GameData>();
 		JSONParser parser = new JSONParser();
-		try (Reader reader = new FileReader(ResourcePath.resolve(DB_PATH))) {
+		try (Reader reader = new InputStreamReader(ResourcePath.openStream(DB_PATH), StandardCharsets.UTF_8)) {
 			JSONObject jsonObject = (JSONObject) parser.parse(reader);
 			JSONArray jsonList = (JSONArray) jsonObject.get(TAG_LIST);
 			Iterator<JSONObject> iterator = jsonList.iterator();

@@ -29,6 +29,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Repeatable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,6 +75,8 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 					fillSpriteList();
 					spritesReady = true;
 					System.out.println("Sprites ready");
+					loadScreenshots();
+					System.out.println("Screenshots ready");
 				} catch (Throwable t) {
 					System.err.println("SpriteLoader failed:");
 					t.printStackTrace();
@@ -143,6 +146,8 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		addSpriteList("src/img/defeat1.png");
 		addSpriteList("src/img/defeat2.png");
 		game.setSpritesNumber(game.getSpriteSizeList().size());
+	}
+	private void loadScreenshots() throws IOException {
 		int screenCount = ResourcePath.countFolderFiles("src/screenShoots");
 		for (int i = 0; i < screenCount; i++) {
 			window.addSpriteList(createSprite("src/screenShoots/screenshot "+(i+1)+".png"));	
@@ -150,7 +155,6 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		}
 	}
 	private void addSpriteList(String path) throws IOException {
-		System.out.println("Loading: " + path);
 		window.addSpriteList(createSprite(path));
 		game.addSpriteSizeList(extractSpriteSize(path));
 	}
@@ -179,10 +183,15 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		if(isGif(path)){
 			int count = ResourcePath.countFolderFiles(path);
 			for (int i = 0; i < count; i++) {
-				sprite.add(ImageIO.read(ResourcePath.resolve(path+"/frame-"+(i+1)+".gif")));
+				try (InputStream in = ResourcePath.openStream(path+"/frame-"+(i+1)+".gif")) {
+					sprite.add(ImageIO.read(in));
+				}
 			}
-		}else 
-			sprite.add(ImageIO.read(ResourcePath.resolve(path)));
+		}else {
+			try (InputStream in = ResourcePath.openStream(path)) {
+				sprite.add(ImageIO.read(in));
+			}
+		}
 		return new Sprite(sprite,path);
 	}
 	private void mainTimer() {

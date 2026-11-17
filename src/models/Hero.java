@@ -10,6 +10,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -73,6 +74,12 @@ public class Hero extends GameObject{
     private BufferedImage imgNormal;
 	private Image subSprite;
 
+	private BufferedImage readImage(String path) throws IOException {
+		try (InputStream in = ResourcePath.openStream(path)) {
+			return ImageIO.read(in);
+		}
+	}
+
 	public Hero(double x, double y, double diameter,ArrayList<GameObject> gameObjectList, Color color) {
 		super(x, y, diameter, color);
 		imageType="";/////////////////////////////////////
@@ -87,14 +94,14 @@ public class Hero extends GameObject{
     	spriteInvertCoords = rightInvCoords;
     	spriteNormalCoords = rightCoords;
     	try {
-    		rightInvImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Right - Inv.png"));
-    		leftInvImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Left - Inv.png"));
-    		upRightImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Up - Right.png"));
-    		downRightImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Down - Right.png"));
-    		downLeftImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Down - Left.png"));
-    		upLeftImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Up - Left.png"));
-    		leftImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Left.png"));
-    		rightImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Right.png"));
+    		rightInvImg = readImage("src/img/jelly - Right - Inv.png");
+    		leftInvImg = readImage("src/img/jelly - Left - Inv.png");
+    		upRightImg = readImage("src/img/jelly - Up - Right.png");
+    		downRightImg = readImage("src/img/jelly - Down - Right.png");
+    		downLeftImg = readImage("src/img/jelly - Down - Left.png");
+    		upLeftImg = readImage("src/img/jelly - Up - Left.png");
+    		leftImg = readImage("src/img/jelly - Left.png");
+    		rightImg = readImage("src/img/jelly - Right.png");
     		img =rightImg;
     		imgJump =rightImg;
     		imgVerticalLeft=upLeftImg;

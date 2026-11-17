@@ -22,6 +22,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -62,7 +63,9 @@ public class GamePanel extends JPanel {
 		positionImages = new Point[] {new Point(498,226)};
 		setBackground(Color.black);
 		alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.0f);
-		background =	ImageIO.read(ResourcePath.resolve("src/img/GameMap.png"));
+		try (InputStream in = ResourcePath.openStream("src/img/GameMap.png")) {
+			background = ImageIO.read(in);
+		}
 		spriteList = new ArrayList<Sprite>();
 		JButton jButton = new JButton();
 		jButton.addKeyListener(gamePresenter);
