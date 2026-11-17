@@ -217,11 +217,20 @@
         }, { passive: false });
 
         function dispatchVirtualKey(type, keyName, keyCode) {
-            const target = (document.activeElement && document.activeElement !== document.body)
+            const wrapper = document.getElementById('game-wrapper');
+            const cheerpjTarget = wrapper
+                ? wrapper.querySelector('[tabindex], canvas')
+                : null;
+            if (cheerpjTarget && (!document.activeElement || !wrapper.contains(document.activeElement))) {
+                try {
+                    cheerpjTarget.focus({ preventScroll: true });
+                } catch (e) {}
+            }
+            const target = (document.activeElement && wrapper && wrapper.contains(document.activeElement))
                 ? document.activeElement
-                : (document.querySelector('#game-wrapper [tabindex]') || document);
+                : (cheerpjTarget || document);
             const evt = new KeyboardEvent(type, {
-                key: keyName,
+                key: keyName === 'KeyP' ? 'p' : keyName,
                 code: keyName,
                 keyCode: keyCode,
                 which: keyCode,
