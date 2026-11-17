@@ -474,11 +474,14 @@ public class Game{
 		return img;
 	}
 	public IndexColection createIdexCollection(int time,int slowdown,int indexSpriteList) throws IOException {
-		int gifTime;
-		BufferedImage img = null;
-		gifTime = (time%slowdown==0)?time/slowdown:(int)(time/slowdown);
-		int imageNumber=(gifTime %spriteSizeList.get(indexSpriteList));
-		return new IndexColection(indexSpriteList, imageNumber);
+		if(spriteSizeList.isEmpty()) {
+			return new IndexColection(0, 0);
+		}
+		int safeIndex = (indexSpriteList >= 0 && indexSpriteList < spriteSizeList.size()) ? indexSpriteList : 0;
+		int gifTime = time / slowdown;
+		int size = Math.max(1, spriteSizeList.get(safeIndex));
+		int imageNumber = gifTime % size;
+		return new IndexColection(safeIndex, imageNumber);
 	}
 	public IndexColection createIdexLoad(int time,int slowdown) throws IOException {
 		int gifTime;
@@ -554,10 +557,10 @@ public class Game{
 		int [][] finalScene= new int[scene.length][3];
 		int sum=sceneStart;
 		for (int i = 0; i < scene.length; i++) {
-			for (int j = 0; j < 3; j++) {
-				finalScene[i][j]=(j==0)?sum:(j==1)?sum+scene[i]:sum+scene[i]+fadeOutSeconds;
-			}
-			sum=sum+scene[i]+fadeOutSeconds;
+			finalScene[i][0] = sum;
+			finalScene[i][1] = sum + scene[i];
+			finalScene[i][2] = sum + scene[i] + fadeOutSeconds;
+			sum = sum + scene[i] + fadeOutSeconds;
 		}
 		return finalScene;
 	}

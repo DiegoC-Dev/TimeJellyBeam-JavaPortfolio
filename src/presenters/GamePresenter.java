@@ -49,6 +49,10 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
     private int seg = 0;
     private long accumulatedNanos = 0L;
     private volatile boolean spritesReady = false;
+    private int[][] cachedPreludeScene;
+    private int cachedPreludeStart = -1;
+    private int[][] cachedIntroScene;
+    private int cachedIntroStart = -1;
     
     public GamePresenter(){
     	System.out.println("vrs 7.10");
@@ -75,10 +79,8 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 					fillSpriteList();
 					spritesReady = true;
 					System.out.println("Sprites ready");
-					if(new java.io.File("src/screenShoots").isDirectory()) {
-						loadScreenshots();
-						System.out.println("Screenshots ready");
-					}
+					loadScreenshots();
+					System.out.println("Screenshots ready");
 				} catch (Throwable t) {
 					System.err.println("SpriteLoader failed:");
 					t.printStackTrace();
@@ -150,7 +152,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		game.setSpritesNumber(game.getSpriteSizeList().size());
 	}
 	private void loadScreenshots() throws IOException {
-		int screenCount = ResourcePath.countFolderFiles("src/screenShoots");
+		int screenCount = Math.min(5, ResourcePath.countFolderFiles("src/screenShoots"));
 		for (int i = 0; i < screenCount; i++) {
 			window.addSpriteList(createSprite("src/screenShoots/screenshot "+(i+1)+".png"));	
 			game.addSpriteSizeList(extractSpriteSize("src/screenShoots/screenshot "+(i+1)+".png"));
@@ -373,8 +375,11 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 //			else {
 				
 				int timeStart =game.getCurrentTimeScene();
-				int []TimeScene= PRELUDE_SCENE_DURATIONS;
-				int [][] scene= game.createSceneTimeList(TimeScene,timeStart);
+				if(cachedPreludeScene == null || cachedPreludeStart != timeStart) {
+					cachedPreludeStart = timeStart;
+					cachedPreludeScene = game.createSceneTimeList(PRELUDE_SCENE_DURATIONS, timeStart);
+				}
+				int [][] scene = cachedPreludeScene;
 				if(seg==timeStart) {
 					game.setEndPrelude(scene[scene.length-1][2]);
 					System.out.println("Prelude range: " + timeStart + ".." + scene[scene.length-1][2]);
@@ -402,8 +407,11 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		if(game.getCurrentScene().equals("introduction")) {
 			int timeStart =game.getCurrentTimeScene();
 			String nextScene = "game";
-			int []TimeScene= new int[] {16};
-			int [][] scene= game.createSceneTimeList(TimeScene,timeStart);
+			if(cachedIntroScene == null || cachedIntroStart != timeStart) {
+				cachedIntroStart = timeStart;
+				cachedIntroScene = game.createSceneTimeList(new int[] {16}, timeStart);
+			}
+			int [][] scene = cachedIntroScene;
 			int[][] indexSpriteList =new int[][]{new int[]{34}};
 			Point[][] positionImages = new Point[][] {new Point[] {new Point(0,0)}};	
 			int[] slowDownImage = new int[] {1};
@@ -701,13 +709,13 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		MouseEvent logicalEvent = window.toLogicalMouseEvent(e);
 		game.changeButton(logicalEvent,9);
 		if(game.getNameObjectScene(logicalEvent)!=null) {
-			if(game.getNameObjectScene(logicalEvent).equals("start")){
+			if(game.getCurrentScene().equals("menu") && game.getNameObjectScene(logicalEvent).equals("start")){
 				game.setChangeScene("introduction");
 			} 
-			else if(game.getNameObjectScene(logicalEvent).equals("screenshots")){	
+			else if(game.getCurrentScene().equals("menu") && game.getNameObjectScene(logicalEvent).equals("screenshots")){	
 				game.setChangeScene("screenShots");
 			}
-			else if(game.getNameObjectScene(logicalEvent).equals("quit")){				
+			else if(game.getCurrentScene().equals("menu") && game.getNameObjectScene(logicalEvent).equals("quit")){				
 				System.exit(0);
 			}
 			else if(game.getNameObjectScene(logicalEvent).equals("continue")){
