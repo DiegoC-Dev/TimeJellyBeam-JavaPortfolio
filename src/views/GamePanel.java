@@ -171,12 +171,12 @@ public class GamePanel extends JPanel {
 			graphics.drawImage(image,positionImageLoad.x,positionImageLoad.y, null);
 			Graphics2D g2d = (Graphics2D) graphics;
 			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-			g2d.setFont(new Font("SansSerif", Font.BOLD, 18));
+			g2d.setFont(new Font("SansSerif", Font.BOLD, 26));
 			g2d.setColor(Color.decode("#d400d4"));
 			String text = loadProgress + "%";
 			int textW = g2d.getFontMetrics().stringWidth(text);
 			int tx = positionImageLoad.x + (image.getWidth() - textW) / 2;
-			int ty = positionImageLoad.y + 144;
+			int ty = positionImageLoad.y + 232;
 			g2d.drawString(text, tx, ty);
 	}
 	private void drawGame(Graphics graphics) {
