@@ -53,6 +53,10 @@ public class ResourcePath {
 		return new FileInputStream(new File("/app/" + normalized));
 	}
 
+	public static boolean isCheerpJ() {
+		return !new File("src").isDirectory() && new File("/app/TimeJellyBeam.jar").exists();
+	}
+
 	public static int countFolderFiles(String path) {
 		File local = new File(path);
 		if (local.isDirectory()) {

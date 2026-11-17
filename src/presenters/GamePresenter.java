@@ -159,8 +159,9 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		}
 	}
 	private void addSpriteList(String path) throws IOException {
-		window.addSpriteList(createSprite(path));
-		game.addSpriteSizeList(extractSpriteSize(path));
+		Sprite sprite = createSprite(path);
+		window.addSpriteList(sprite);
+		game.addSpriteSizeList(sprite.getSprite().size());
 	}
 	private void addScrenShot(boolean screenShoot) {
 		try {
@@ -186,7 +187,8 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		ArrayList<BufferedImage> sprite = new ArrayList<BufferedImage>();
 		if(isGif(path)){
 			int count = ResourcePath.countFolderFiles(path);
-			for (int i = 0; i < count; i++) {
+			int step = (ResourcePath.isCheerpJ() && count >= 24) ? ((count >= 40) ? 3 : 2) : 1;
+			for (int i = 0; i < count; i += step) {
 				try (InputStream in = ResourcePath.openStream(path+"/frame-"+(i+1)+".gif")) {
 					sprite.add(ImageIO.read(in));
 				}
