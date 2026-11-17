@@ -26,6 +26,10 @@
             justify-content: center;
             padding: 8px;
         }
+        body.is-touch {
+            flex-direction: column;
+            gap: 10px;
+        }
         #loading {
             position: fixed;
             inset: 0;
@@ -61,6 +65,10 @@
             box-shadow: 0 0 35px rgba(239, 48, 129, 0.35);
             border-radius: 10px;
             overflow: hidden;
+            flex-shrink: 0;
+        }
+        body.is-touch #game-wrapper {
+            touch-action: none;
         }
         #start-btn {
             display: none;
@@ -79,6 +87,64 @@
         #start-btn:hover {
             transform: scale(1.04);
         }
+        #mobile-controls {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            flex-shrink: 0;
+        }
+        body.is-touch #mobile-controls {
+            display: flex;
+        }
+        .dpad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 56px);
+            grid-template-rows: repeat(3, 44px);
+            gap: 6px;
+        }
+        .dpad-btn {
+            background: #171226;
+            color: #ef3081;
+            border: 2px solid #00a78e;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 3px 10px rgba(0, 167, 142, 0.25);
+            transition: transform 0.06s ease, background-color 0.06s ease;
+        }
+        .dpad-btn:active, .dpad-btn.active {
+            background: #ef3081;
+            color: #ffffff;
+            border-color: #ef3081;
+            transform: scale(0.94);
+        }
+        .dpad-up    { grid-column: 2; grid-row: 1; }
+        .dpad-left  { grid-column: 1; grid-row: 2; }
+        .dpad-right { grid-column: 3; grid-row: 2; }
+        .dpad-down  { grid-column: 2; grid-row: 3; }
+        .action-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .action-btn {
+            width: 68px;
+            height: 44px;
+            font-size: 13px;
+            letter-spacing: 0.4px;
+        }
     </style>
 </head>
 <body>
@@ -89,10 +155,31 @@
     </div>
     <div id="game-wrapper"></div>
 
+    <div id="mobile-controls" aria-label="Controles táctiles">
+        <div class="dpad-grid">
+            <button type="button" class="dpad-btn dpad-up" data-key="ArrowUp" data-code="38" aria-label="Arriba">&#9650;</button>
+            <button type="button" class="dpad-btn dpad-left" data-key="ArrowLeft" data-code="37" aria-label="Izquierda">&#9664;</button>
+            <button type="button" class="dpad-btn dpad-right" data-key="ArrowRight" data-code="39" aria-label="Derecha">&#9654;</button>
+            <button type="button" class="dpad-btn dpad-down" data-key="ArrowDown" data-code="40" aria-label="Abajo">&#9660;</button>
+        </div>
+        <div class="action-col">
+            <button type="button" class="dpad-btn action-btn" data-key="KeyP" data-code="80" aria-label="Pausa">Pausa</button>
+            <button type="button" class="dpad-btn action-btn" data-key="Escape" data-code="27" aria-label="Saltar">Skip</button>
+        </div>
+    </div>
+
     <script>
+        const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
+            || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
+
+        if (isTouchDevice) {
+            document.body.classList.add('is-touch');
+        }
+
         function getViewportDisplaySize() {
+            const controlsReserve = isTouchDevice ? 164 : 0;
             const availW = Math.max(320, window.innerWidth - 16);
-            const availH = Math.max(180, window.innerHeight - 16);
+            const availH = Math.max(180, window.innerHeight - 16 - controlsReserve);
             let w = Math.min(1280, availW);
             let h = Math.round(w * (768 / 1366));
             if (h > availH) {
@@ -120,6 +207,104 @@
                 e.preventDefault();
             }
         }, { passive: false });
+
+        function dispatchVirtualKey(type, keyName, keyCode) {
+            const target = (document.activeElement && document.activeElement !== document.body)
+                ? document.activeElement
+                : (document.querySelector('#game-wrapper [tabindex]') || document);
+            const evt = new KeyboardEvent(type, {
+                key: keyName,
+                code: keyName,
+                keyCode: keyCode,
+                which: keyCode,
+                bubbles: true,
+                cancelable: true
+            });
+            target.dispatchEvent(evt);
+        }
+
+        document.querySelectorAll('.dpad-btn').forEach(function (btn) {
+            const keyName = btn.dataset.key;
+            const keyCode = parseInt(btn.dataset.code, 10);
+
+            function handlePress(e) {
+                e.preventDefault();
+                unlockWebAudio();
+                btn.classList.add('active');
+                dispatchVirtualKey('keydown', keyName, keyCode);
+            }
+
+            function handleRelease(e) {
+                e.preventDefault();
+                btn.classList.remove('active');
+                dispatchVirtualKey('keyup', keyName, keyCode);
+            }
+
+            btn.addEventListener('touchstart', handlePress, { passive: false });
+            btn.addEventListener('touchend', handleRelease, { passive: false });
+            btn.addEventListener('touchcancel', handleRelease, { passive: false });
+            btn.addEventListener('mousedown', handlePress);
+            btn.addEventListener('mouseup', handleRelease);
+        });
+
+        // Swipe gestures on game board (supports chained swipes without blocking menu taps)
+        (function setupSwipeControls() {
+            const gameEl = document.getElementById('game-wrapper');
+            if (!gameEl) return;
+            const SWIPE_THRESHOLD = 24;
+            let startX = 0;
+            let startY = 0;
+            let tracking = false;
+
+            gameEl.addEventListener('touchstart', function (e) {
+                if (e.touches.length !== 1) {
+                    tracking = false;
+                    return;
+                }
+                unlockWebAudio();
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                tracking = true;
+            }, { passive: true });
+
+            gameEl.addEventListener('touchmove', function (e) {
+                if (!tracking || e.touches.length !== 1) return;
+                const curX = e.touches[0].clientX;
+                const curY = e.touches[0].clientY;
+                const dx = curX - startX;
+                const dy = curY - startY;
+
+                if (Math.abs(dx) < SWIPE_THRESHOLD && Math.abs(dy) < SWIPE_THRESHOLD) {
+                    return;
+                }
+
+                e.preventDefault();
+                let keyName, keyCode;
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    keyName = dx > 0 ? 'ArrowRight' : 'ArrowLeft';
+                    keyCode = dx > 0 ? 39 : 37;
+                } else {
+                    keyName = dy > 0 ? 'ArrowDown' : 'ArrowUp';
+                    keyCode = dy > 0 ? 40 : 38;
+                }
+
+                dispatchVirtualKey('keydown', keyName, keyCode);
+                setTimeout(function () {
+                    dispatchVirtualKey('keyup', keyName, keyCode);
+                }, 100);
+
+                startX = curX;
+                startY = curY;
+            }, { passive: false });
+
+            gameEl.addEventListener('touchend', function () {
+                tracking = false;
+            }, { passive: true });
+
+            gameEl.addEventListener('touchcancel', function () {
+                tracking = false;
+            }, { passive: true });
+        })();
 
         async function run() {
             try {
