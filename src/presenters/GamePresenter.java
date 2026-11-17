@@ -75,8 +75,10 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 					fillSpriteList();
 					spritesReady = true;
 					System.out.println("Sprites ready");
-					loadScreenshots();
-					System.out.println("Screenshots ready");
+					if(new java.io.File("src/screenShoots").isDirectory()) {
+						loadScreenshots();
+						System.out.println("Screenshots ready");
+					}
 				} catch (Throwable t) {
 					System.err.println("SpriteLoader failed:");
 					t.printStackTrace();
@@ -157,7 +159,6 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 	private void addSpriteList(String path) throws IOException {
 		window.addSpriteList(createSprite(path));
 		game.addSpriteSizeList(extractSpriteSize(path));
-		System.out.println("Loaded: " + path);
 	}
 	private void addScrenShot(boolean screenShoot) {
 		try {
@@ -196,7 +197,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		return new Sprite(sprite,path);
 	}
 	private void mainTimer() {
-		Timer gameLoop = new Timer(16, new ActionListener(){
+		Timer gameLoop = new Timer(33, new ActionListener(){
 			int cont=0;
 			int transitionSlowdown= 10;
 			long lastTickNanos = System.nanoTime();
@@ -241,6 +242,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 					} catch (IOException e) {
 						e.printStackTrace();
 				}
+				window.getPanel().repaint();
 			}
 		});
 		gameLoop.start();

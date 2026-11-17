@@ -128,8 +128,10 @@ public class GamePanel extends JPanel {
 		if(win) {
 			drawWin(graphics);
 		}
-		setOpacity(graphics);
-		drawBlackBackground(graphics);
+		if(alphaComposite != null && alphaComposite.getAlpha() > 0.01f) {
+			setOpacity(graphics);
+			drawBlackBackground(graphics);
+		}
 	}
 
 	private void drawBlackBackground(Graphics graphics) {
@@ -183,8 +185,10 @@ public class GamePanel extends JPanel {
 
 		    		drawAnimatedImage(graphics);
 
-		    		setOpacity(graphics);
-		    		drawBlackBackground(graphics);
+		    		if(alphaComposite != null && alphaComposite.getAlpha() > 0.01f) {
+		    			setOpacity(graphics);
+		    			drawBlackBackground(graphics);
+		    		}
 
 	}
 	private void drawGemTimeSprite(Graphics graphics) {
@@ -270,8 +274,7 @@ public class GamePanel extends JPanel {
     	this.gemList = gemList;
     }
     private void swingWorker(){
-		new javax.swing.Timer(16, e -> repaint()).start();
-	}
+    }
     public void setWin(boolean win) {
     	finalTime = initTime-time;
     	this.win = win;
