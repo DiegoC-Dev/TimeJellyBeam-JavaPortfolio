@@ -447,13 +447,14 @@ public class Game{
 	}	
 
 	public int [][] createSceneTimeList(int[] scene,int sceneStart) {
+		int fadeOutSeconds = 2;
 		int [][] finalScene= new int[scene.length][3];
 		int sum=sceneStart;
 		for (int i = 0; i < scene.length; i++) {
 			for (int j = 0; j < 3; j++) {
-				finalScene[i][j]=(j==0)?sum:(j==1)?sum+scene[i]:sum+scene[i]+4;
+				finalScene[i][j]=(j==0)?sum:(j==1)?sum+scene[i]:sum+scene[i]+fadeOutSeconds;
 			}
-			sum=sum+scene[i]+4;
+			sum=sum+scene[i]+fadeOutSeconds;
 		}
 		return finalScene;
 	}

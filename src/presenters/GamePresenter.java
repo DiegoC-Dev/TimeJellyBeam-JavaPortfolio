@@ -37,8 +37,12 @@ import java.util.Set;
 
 public class GamePresenter implements KeyListener,MouseListener, MouseMotionListener{
 
+    private static final int[] PRELUDE_SCENE_DURATIONS = new int[] {2, 9, 9, 12, 9, 4, 4};
+
     private Game game;
     private GameWindow window;
+    private int seg = 0;
+    private long accumulatedNanos = 0L;
     
     public GamePresenter(){
     	System.out.println("vrs 7.9");
@@ -166,10 +170,8 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 	private void mainTimer() {
 		Timer gameLoop = new Timer(1, new ActionListener(){
 			int cont=0;
-			int seg=0;
 			int transitionSlowdown= 10;
 			long lastTickNanos = System.nanoTime();
-			long accumulatedNanos = 0L;
 			public void actionPerformed(ActionEvent actionEvent) {
 				long now = System.nanoTime();
 				long elapsedNanos = now - lastTickNanos;
@@ -277,7 +279,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		if(seg>=placeOpacity && seg<endScene) {
 			transitionInput = false;
 		}
-		if(seg>(sceneStart+3) && seg<placeOpacity)
+		if(seg>(sceneStart+1) && seg<placeOpacity)
 			setAlphaComposite=false;
 		if(setAlphaComposite)
 			window.setAlphaComposite(game.createTransition(cont, transitionSlowdown, transitionInput));
@@ -324,7 +326,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 //			else {
 				
 				int timeStart =game.getCurrentTimeScene();
-				int []TimeScene= new int[] {5,25,25,32,25,8,8};
+				int []TimeScene= PRELUDE_SCENE_DURATIONS;
 				int [][] scene= game.createSceneTimeList(TimeScene,timeStart);
 				if(seg==timeStart)
 					game.setEndPrelude(scene[scene.length-1][2]);
@@ -520,9 +522,47 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		new GamePresenter();
 	}    
     
+	private void advancePreludeScene() {
+		if(!game.getCurrentScene().equals("prelude")) {
+			return;
+		}
+		int[][] scene = game.createSceneTimeList(PRELUDE_SCENE_DURATIONS, game.getCurrentTimeScene());
+		for(int i = 0; i < scene.length; i++) {
+			if(seg >= scene[i][0] && seg < scene[i][2]) {
+				if(i < scene.length - 1) {
+					seg = scene[i][2];
+					accumulatedNanos = 0L;
+				} else {
+					skipPreludeToMenu();
+				}
+				return;
+			}
+		}
+	}
+
+	private void skipPreludeToMenu() {
+		if(!game.getCurrentScene().equals("prelude")) {
+			return;
+		}
+		game.setCurrentTimeScene(seg);
+		game.setCurrentScene("menu");
+		game.setChangeScene("menu");
+		accumulatedNanos = 0L;
+	}
+
 	@Override
 	public void keyPressed(KeyEvent e) {
 		int key = e.getKeyCode();
+		if(game.getCurrentScene().equals("prelude")) {
+			if(key == KeyEvent.VK_SPACE || key == KeyEvent.VK_ENTER || key == KeyEvent.VK_RIGHT) {
+				advancePreludeScene();
+				return;
+			}
+			if(key == KeyEvent.VK_ESCAPE) {
+				skipPreludeToMenu();
+				return;
+			}
+		}
 		key = key==37?key+10:key;
 		game.setPause(key==80 && !game.isPause()?true:key==80 && game.isPause()?false:game.isPause());
 		System.out.println(key);
@@ -573,6 +613,10 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 	}
 	@Override
 	public void mousePressed(MouseEvent e) {
+		if(game.getCurrentScene().equals("prelude")) {
+			advancePreludeScene();
+			return;
+		}
 		game.changeButton(e,9);
 		if(game.getNameObjectScene(e)!=null) {
 			if(game.getNameObjectScene(e).equals("start")){
