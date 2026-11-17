@@ -337,14 +337,16 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 //		if(game.isSkip()) {
 //			timeNextScene= seg;
 //		}
-		if(seg==timeNextScene) {
-			game.setCurrentTimeScene(timeNextScene);
+		if(seg>=timeNextScene) {
+			System.out.println("Leaving " + game.getCurrentScene() + " -> " + nextScene + " at seg=" + seg + " (timeNextScene=" + timeNextScene + ")");
+			game.setCurrentTimeScene(seg);
 			game.setCurrentScene(nextScene);
 			game.setChangeScene(nextScene);
 			if(nextScene.equals("menu")) {
 				game.stopPreludeSound();
 				game.playMenuSound();
 			}
+			return;
 		}
 		
 		for (int i = 0; i < scene.length; i++) {
@@ -373,8 +375,10 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 				int timeStart =game.getCurrentTimeScene();
 				int []TimeScene= PRELUDE_SCENE_DURATIONS;
 				int [][] scene= game.createSceneTimeList(TimeScene,timeStart);
-				if(seg==timeStart)
+				if(seg==timeStart) {
 					game.setEndPrelude(scene[scene.length-1][2]);
+					System.out.println("Prelude range: " + timeStart + ".." + scene[scene.length-1][2]);
+				}
 				int[][] indexSpriteList =new int[][] {new int[]{0,13},new int[]{1,14},new int[]{2,15},new int[]{3,16},
 					new int[]{4,17},new int[]{18},new int[]{19}};
 					Point[][] positionImages = new Point[][] {new Point[] {new Point(468,226),new Point(-30,-20)},
