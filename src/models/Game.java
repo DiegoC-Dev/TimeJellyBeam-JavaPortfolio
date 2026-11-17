@@ -415,9 +415,9 @@ public class Game{
 	public BufferedImage createAnimatedImage(int time,int slowdown,String path) throws IOException {
 		int gifTime;
 		BufferedImage img = null;
-		File gifFolder = ResourcePath.resolve(path);
+		int count = ResourcePath.countFolderFiles(path);
 		gifTime = (time%slowdown==0)?time/slowdown:(int)(time/slowdown);
-		int imageNumber=(gifTime %gifFolder.listFiles().length)+1;
+		int imageNumber=(count > 0) ? (gifTime % count)+1 : 1;
 		img = ImageIO.read(ResourcePath.resolve(path+"/frame-"+imageNumber+".gif"));
 		return img;
 	}

@@ -156,7 +156,7 @@ public class GamePanel extends JPanel {
 		}
 	}
 	private void drawAnimatedLoad(Graphics graphics) {
-		if(loadIndex == null || loadSprite == null || positionImageLoad == null) {
+		if(loadIndex == null || loadSprite == null || loadSprite.getSprite().isEmpty() || positionImageLoad == null) {
 			return;
 		}
 		int imageIndex;

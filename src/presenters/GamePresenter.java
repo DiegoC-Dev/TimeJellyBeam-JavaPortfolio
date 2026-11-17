@@ -127,9 +127,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		addSpriteList("src/img/defeat1.png");
 		addSpriteList("src/img/defeat2.png");
 		game.setSpritesNumber(game.getSpriteSizeList().size());
-		File screeenShotFolder = ResourcePath.resolve("src/screenShoots");
-		File[] screenFiles = screeenShotFolder.listFiles();
-		int screenCount = (screenFiles != null) ? screenFiles.length : 0;
+		int screenCount = ResourcePath.countFolderFiles("src/screenShoots");
 		for (int i = 0; i < screenCount; i++) {
 			window.addSpriteList(createSprite("src/screenShoots/screenshot "+(i+1)+".png"));	
 			game.addSpriteSizeList(extractSpriteSize("src/screenShoots/screenshot "+(i+1)+".png"));
@@ -153,9 +151,8 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 	}
 	private int extractSpriteSize(String path) {
 		if(isGif(path)) {
-			File f = ResourcePath.resolve(path);
-			File[] files = f.listFiles();
-			return (files != null) ? files.length : 1;
+			int count = ResourcePath.countFolderFiles(path);
+			return (count > 0) ? count : 1;
 		}
 		else
 			return 1;	
@@ -163,9 +160,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 	private Sprite createSprite(String path) throws IOException {
 		ArrayList<BufferedImage> sprite = new ArrayList<BufferedImage>();
 		if(isGif(path)){
-			File f = ResourcePath.resolve(path);
-			File[] files = f.listFiles();
-			int count = (files != null) ? files.length : 0;
+			int count = ResourcePath.countFolderFiles(path);
 			for (int i = 0; i < count; i++) {
 				sprite.add(ImageIO.read(ResourcePath.resolve(path+"/frame-"+(i+1)+".gif")));
 			}
