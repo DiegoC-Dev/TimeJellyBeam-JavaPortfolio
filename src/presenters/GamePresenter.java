@@ -48,6 +48,8 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
     private GameWindow window;
     private int seg = 0;
     private long accumulatedNanos = 0L;
+    private static final int TOTAL_SPRITES = 43;
+    private int loadedSpritesCount = 0;
     private volatile boolean spritesReady = false;
     private int[][] cachedPreludeScene;
     private int cachedPreludeStart = -1;
@@ -160,6 +162,13 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		game.addSpriteSizeList(sprite.getSprite().size());
 		int step = isGif(path) ? ResourcePath.getGifStep(ResourcePath.countFolderFiles(path)) : 1;
 		game.addSpriteStep(step);
+		try {
+			Thread.sleep(550);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+		loadedSpritesCount++;
+		window.setLoadProgress(Math.min(100, (loadedSpritesCount * 100) / TOTAL_SPRITES));
 	}
 	private void addScrenShot(boolean screenShoot) {
 		try {

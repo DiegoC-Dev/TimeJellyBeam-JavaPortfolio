@@ -110,6 +110,9 @@ public class GameWindow extends JFrame{
 	public void setFinishLoad(boolean finishLoad) {
 		panelGame.setFinishLoad(finishLoad);
 	}
+	public void setLoadProgress(int loadProgress) {
+		panelGame.setLoadProgress(loadProgress);
+	}
 	public MouseEvent toLogicalMouseEvent(MouseEvent e) {
 		return panelGame.toLogicalMouseEvent(e);
 	}
