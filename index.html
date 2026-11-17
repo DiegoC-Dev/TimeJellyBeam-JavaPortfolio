@@ -141,11 +141,11 @@
         .action-col {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
         }
         .action-btn {
             width: 68px;
-            height: 44px;
+            height: 40px;
             font-size: 13px;
             letter-spacing: 0.4px;
         }
@@ -172,6 +172,7 @@
         </div>
         <div class="action-col">
             <button type="button" class="dpad-btn action-btn" data-keys="KeyP:80" aria-label="Pausa">Pausa</button>
+            <button type="button" class="dpad-btn action-btn" data-keys="Space:32" aria-label="Siguiente escena">Next</button>
             <button type="button" class="dpad-btn action-btn" data-keys="Escape:27" aria-label="Saltar">Skip</button>
         </div>
     </div>
@@ -230,7 +231,7 @@
                 ? document.activeElement
                 : (cheerpjTarget || document);
             const evt = new KeyboardEvent(type, {
-                key: keyName === 'KeyP' ? 'p' : keyName,
+                key: keyName === 'KeyP' ? 'p' : (keyName === 'Space' ? ' ' : keyName),
                 code: keyName,
                 keyCode: keyCode,
                 which: keyCode,
