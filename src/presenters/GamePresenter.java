@@ -72,6 +72,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 				try {
 					fillSpriteList();
 					spritesReady = true;
+					System.out.println("Sprites ready");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -407,6 +408,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 			placeEndScene(seg);
 		}
 			if(spritesReady && seg>=game.getEndScene()){
+				System.out.println("Entering prelude at seg=" + seg);
 				game.setCurrentScene("prelude");
 				game.setCurrentTimeScene(seg);
 				window.setFinishLoad(true);

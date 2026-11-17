@@ -49,6 +49,10 @@ public class Game{
 	private Clip clipMenu;
 	private long clipTimeMenu;
 	private Clip clipPrelude;
+	private final Object audioLock = new Object();
+	private int bgAudioToken = 0;
+	private int menuAudioToken = 0;
+	private int preludeAudioToken = 0;
 	private int transitionStarTime;
 	private String [][] TextMatrix;
 	private int placeOpacity;
@@ -302,25 +306,68 @@ public class Game{
 		}
 	}
 	public void stopBackgroundSound() {
-		stopClip(clip);
-		clip = null;
+		synchronized (audioLock) {
+			bgAudioToken++;
+			stopClip(clip);
+			clip = null;
+		}
 	}
 	public void stopMenuSound() {
-		stopClip(clipMenu);
-		clipMenu = null;
-	}
-	private Clip openLoopingClip(String resourcePath) {
-		try {
-			Clip newClip = AudioSystem.getClip();
-			AudioInputStream inputStream = openAudioStream(resourcePath);
-			newClip.open(inputStream);
-			newClip.loop(Clip.LOOP_CONTINUOUSLY);
-			newClip.start();
-			return newClip;
-		} catch (LineUnavailableException |UnsupportedAudioFileException | IOException e) {
-			e.printStackTrace();
-			return null;
+		synchronized (audioLock) {
+			menuAudioToken++;
+			stopClip(clipMenu);
+			clipMenu = null;
 		}
+	}
+	private void playLoopingClipAsync(final String resourcePath, final String channel) {
+		final int token;
+		synchronized (audioLock) {
+			if ("prelude".equals(channel)) {
+				token = ++preludeAudioToken;
+				stopClip(clipPrelude);
+				clipPrelude = null;
+			} else if ("menu".equals(channel)) {
+				token = ++menuAudioToken;
+				stopClip(clipMenu);
+				clipMenu = null;
+			} else {
+				token = ++bgAudioToken;
+				stopClip(clip);
+				clip = null;
+			}
+		}
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Clip newClip = AudioSystem.getClip();
+					AudioInputStream inputStream = openAudioStream(resourcePath);
+					newClip.open(inputStream);
+					synchronized (audioLock) {
+						boolean stillValid = ("prelude".equals(channel) && token == preludeAudioToken)
+								|| ("menu".equals(channel) && token == menuAudioToken)
+								|| ("bg".equals(channel) && token == bgAudioToken);
+						if (!stillValid) {
+							newClip.close();
+							return;
+						}
+						if ("prelude".equals(channel)) {
+							clipPrelude = newClip;
+						} else if ("menu".equals(channel)) {
+							clipMenu = newClip;
+						} else {
+							clip = newClip;
+						}
+						newClip.loop(Clip.LOOP_CONTINUOUSLY);
+						newClip.start();
+					}
+				} catch (LineUnavailableException | UnsupportedAudioFileException | IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}, "Audio-" + channel);
+		t.setDaemon(true);
+		t.start();
 	}
 	private void setClipVolume(Clip c, float linear) {
 		if(c != null && c.isOpen() && c.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
@@ -339,20 +386,20 @@ public class Game{
 		setClipVolume(clip, linear);
 	}
 	public void stopPreludeSound() {
-		stopClip(clipPrelude);
-		clipPrelude = null;
+		synchronized (audioLock) {
+			preludeAudioToken++;
+			stopClip(clipPrelude);
+			clipPrelude = null;
+		}
 	}
 	public void playPreludeSound() {
-		stopPreludeSound();
-		clipPrelude = openLoopingClip("/prelude.wav");
+		playLoopingClipAsync("/prelude.wav", "prelude");
 	}
 	public void playBackgroundSound() {
-		stopBackgroundSound();
-		clip = openLoopingClip("/game_music .wav");
+		playLoopingClipAsync("/game_music .wav", "bg");
 	}
 	public void playMenuSound() {
-		stopMenuSound();
-		clipMenu = openLoopingClip("/menu.wav");
+		playLoopingClipAsync("/menu.wav", "menu");
 	}
 	
 	public void soundBackdgoundPause(int key){
