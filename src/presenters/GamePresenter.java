@@ -47,6 +47,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
     private GameWindow window;
     private int seg = 0;
     private long accumulatedNanos = 0L;
+    private volatile boolean spritesReady = false;
     
     public GamePresenter(){
     	System.out.println("vrs 7.9");
@@ -63,9 +64,21 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		window.draw();
 		mainTimer();
 		viewData();
-		fillSpriteList();
 		initPrelude();
 		game.writeData();
+		Thread loader = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					fillSpriteList();
+					spritesReady = true;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}, "SpriteLoader");
+		loader.setDaemon(true);
+		loader.start();
 	}
 	private void viewData() {
 		window.updateHero(game.getHero());
@@ -393,11 +406,13 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		if(game.getChangeScene().equals("load")) {
 			placeEndScene(seg);
 		}
-			if(seg==game.getEndScene()){
+			if(spritesReady && seg>=game.getEndScene()){
 				game.setCurrentScene("prelude");
 				game.setCurrentTimeScene(seg);
 				window.setFinishLoad(true);
 				game.playPreludeSound();
+			} else if(!spritesReady && seg >= game.getEndScene()) {
+				game.setEndScene(seg + 1);
 			}
 			placeScene(seg,cont,slowDownImage,transitionInput,
 					sceneStart,game.getPlaceOpacity(),game.getEndScene(),

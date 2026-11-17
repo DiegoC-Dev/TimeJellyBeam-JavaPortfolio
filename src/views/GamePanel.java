@@ -47,7 +47,6 @@ public class GamePanel extends JPanel {
 	private IndexColection[] indexColectionGemList;
 	private IndexColection indexBigGem;
 	private IndexColection loadIndex;
-	private BufferedImage blackBackground;
 	private AlphaComposite alphaComposite;
 	private Point[] positionImages;
 	private Point positionImageLoad;
@@ -62,8 +61,7 @@ public class GamePanel extends JPanel {
 		indexColectionList = new IndexColection[] {new IndexColection(0, 0)};
 		positionImages = new Point[] {new Point(498,226)};
 		setBackground(Color.black);
-		alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 10 * 0.1f);
-		blackBackground =	ImageIO.read(ResourcePath.resolve("src/img/blackBackground.png"));
+		alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.0f);
 		background =	ImageIO.read(ResourcePath.resolve("src/img/GameMap.png"));
 		spriteList = new ArrayList<Sprite>();
 		JButton jButton = new JButton();
@@ -132,7 +130,8 @@ public class GamePanel extends JPanel {
 	}
 
 	private void drawBlackBackground(Graphics graphics) {
-		graphics.drawImage(blackBackground,0,0, null);		
+		graphics.setColor(Color.BLACK);
+		graphics.fillRect(0, 0, Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
 	}
 
 	private void setOpacity(Graphics graphics) {
