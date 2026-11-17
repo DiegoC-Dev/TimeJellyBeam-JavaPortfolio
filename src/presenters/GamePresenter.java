@@ -50,7 +50,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
     private volatile boolean spritesReady = false;
     
     public GamePresenter(){
-    	System.out.println("vrs 7.9");
+    	System.out.println("vrs 7.10");
         try {
         	window = new GameWindow(this);
         	game = new Game();
@@ -69,12 +69,14 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		Thread loader = new Thread(new Runnable() {
 			@Override
 			public void run() {
+				System.out.println("SpriteLoader started");
 				try {
 					fillSpriteList();
 					spritesReady = true;
 					System.out.println("Sprites ready");
-				} catch (IOException e) {
-					e.printStackTrace();
+				} catch (Throwable t) {
+					System.err.println("SpriteLoader failed:");
+					t.printStackTrace();
 				}
 			}
 		}, "SpriteLoader");
@@ -148,6 +150,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		}
 	}
 	private void addSpriteList(String path) throws IOException {
+		System.out.println("Loading: " + path);
 		window.addSpriteList(createSprite(path));
 		game.addSpriteSizeList(extractSpriteSize(path));
 	}
