@@ -157,6 +157,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 	private void addSpriteList(String path) throws IOException {
 		window.addSpriteList(createSprite(path));
 		game.addSpriteSizeList(extractSpriteSize(path));
+		System.out.println("Loaded: " + path);
 	}
 	private void addScrenShot(boolean screenShoot) {
 		try {
@@ -419,15 +420,16 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		if(game.getChangeScene().equals("load")) {
 			placeEndScene(seg);
 		}
-			if(spritesReady && seg>=game.getEndScene()){
-				System.out.println("Entering prelude at seg=" + seg);
-				game.setCurrentScene("prelude");
-				game.setCurrentTimeScene(seg);
-				window.setFinishLoad(true);
-				game.playPreludeSound();
-			} else if(!spritesReady && seg >= game.getEndScene()) {
-				game.setEndScene(seg + 1);
-			}
+		if(!spritesReady) {
+			game.setPlaceOpacity(seg + 2);
+			game.setEndScene(seg + 4);
+		} else if(seg>=game.getEndScene()){
+			System.out.println("Entering prelude at seg=" + seg);
+			game.setCurrentScene("prelude");
+			game.setCurrentTimeScene(seg);
+			window.setFinishLoad(true);
+			game.playPreludeSound();
+		}
 			placeScene(seg,cont,slowDownImage,transitionInput,
 					sceneStart,game.getPlaceOpacity(),game.getEndScene(),
 					indexSpriteList,transitionSlowdown-5,positionImages);				
