@@ -427,6 +427,9 @@ public class Hero extends GameObject{
 		}
 	}
 	public void receiveKeys(int key){
+		if(key != 38 && key != 39 && key != 40 && key != 47) {
+			return;
+		}
 		if(!awake) {
 			imgJump = (imageType.equals("- Left") && key==38)?leftImg:(imageType.equals("- Right") && key==38)?rightImg:imgJump;
 			spriteJumpCoords=(imageType.equals("- Left") && key==38)?jumpLeftCoords:(imageType.equals("- Right") && key==38)?jumpRightCoords:spriteJumpCoords;
@@ -435,6 +438,10 @@ public class Hero extends GameObject{
 		if(!numberFound(key)) {
 			addPressedKey(key);
 		}
+	}
+	public void clearPressedKeys() {
+		pressedKeys.clear();
+		pressedKeys.add(0);
 	}
 
 	public void setAdhered(boolean adhered) {
@@ -491,6 +498,9 @@ public class Hero extends GameObject{
 		this.jumpUp = jumpUp;
 	}
 	public void setPause(boolean pause) {
+		if(pause && !this.pause) {
+			clearPressedKeys();
+		}
 		this.pause = pause;
 	}
 }

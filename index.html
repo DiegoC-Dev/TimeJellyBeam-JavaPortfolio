@@ -241,26 +241,68 @@
             target.dispatchEvent(evt);
         }
 
+        const activeVirtualKeys = new Map();
+
+        function pressVirtualKey(keyName, keyCode) {
+            const count = activeVirtualKeys.get(keyName) || 0;
+            activeVirtualKeys.set(keyName, count + 1);
+            if (count === 0) {
+                dispatchVirtualKey('keydown', keyName, keyCode);
+            }
+        }
+
+        function releaseVirtualKey(keyName, keyCode) {
+            const count = activeVirtualKeys.get(keyName) || 0;
+            if (count <= 1) {
+                activeVirtualKeys.delete(keyName);
+                dispatchVirtualKey('keyup', keyName, keyCode);
+            } else {
+                activeVirtualKeys.set(keyName, count - 1);
+            }
+        }
+
+        function releaseAllVirtualKeys() {
+            document.querySelectorAll('.dpad-btn.active').forEach(function (b) {
+                b.classList.remove('active');
+            });
+            Array.from(activeVirtualKeys.entries()).forEach(function (entry) {
+                const keyName = entry[0];
+                const codeMap = { ArrowLeft: 37, ArrowUp: 38, ArrowRight: 39, ArrowDown: 40, KeyP: 80, Escape: 27, Space: 32 };
+                dispatchVirtualKey('keyup', keyName, codeMap[keyName] || 0);
+            });
+            activeVirtualKeys.clear();
+        }
+
+        window.addEventListener('blur', releaseAllVirtualKeys);
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) releaseAllVirtualKeys();
+        });
+
         document.querySelectorAll('.dpad-btn').forEach(function (btn) {
             const keyPairs = (btn.dataset.keys || '').split(',').map(function (entry) {
                 const parts = entry.split(':');
                 return { keyName: parts[0], keyCode: parseInt(parts[1], 10) };
             }).filter(function (p) { return p.keyName && !isNaN(p.keyCode); });
+            let isPressed = false;
 
             function handlePress(e) {
                 e.preventDefault();
                 unlockWebAudio();
+                if (isPressed) return;
+                isPressed = true;
                 btn.classList.add('active');
                 keyPairs.forEach(function (p) {
-                    dispatchVirtualKey('keydown', p.keyName, p.keyCode);
+                    pressVirtualKey(p.keyName, p.keyCode);
                 });
             }
 
             function handleRelease(e) {
-                e.preventDefault();
+                if (e) e.preventDefault();
+                if (!isPressed) return;
+                isPressed = false;
                 btn.classList.remove('active');
                 keyPairs.forEach(function (p) {
-                    dispatchVirtualKey('keyup', p.keyName, p.keyCode);
+                    releaseVirtualKey(p.keyName, p.keyCode);
                 });
             }
 
@@ -269,6 +311,7 @@
             btn.addEventListener('touchcancel', handleRelease, { passive: false });
             btn.addEventListener('mousedown', handlePress);
             btn.addEventListener('mouseup', handleRelease);
+            btn.addEventListener('mouseleave', handleRelease);
         });
 
         // Swipe gestures on game board (supports chained swipes without blocking menu taps)

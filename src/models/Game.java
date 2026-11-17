@@ -459,6 +459,7 @@ public class Game{
 		}
 	}
 	public void restartHero() {
+		hero.clearPressedKeys();
 		hero.setCoordinates(new Point(150, 600));
 //		win=false;
 //		defeat=false;
