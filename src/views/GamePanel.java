@@ -6,6 +6,7 @@ import models.GameObject;
 import models.Gem;
 import models.Hero;
 import models.IndexColection;
+import models.ResourcePath;
 import models.Sprite;
 import models.TimeGem;
 import presenters.GamePresenter;
@@ -62,8 +63,8 @@ public class GamePanel extends JPanel {
 		positionImages = new Point[] {new Point(498,226)};
 		setBackground(Color.black);
 		alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 10 * 0.1f);
-		blackBackground =	ImageIO.read(new File("src/img/blackBackground.png"));
-		background =	ImageIO.read(new File("src/img/GameMap.png"));
+		blackBackground =	ImageIO.read(ResourcePath.resolve("src/img/blackBackground.png"));
+		background =	ImageIO.read(ResourcePath.resolve("src/img/GameMap.png"));
 		spriteList = new ArrayList<Sprite>();
 		JButton jButton = new JButton();
 		jButton.addKeyListener(gamePresenter);
@@ -242,7 +243,7 @@ public class GamePanel extends JPanel {
     	BufferedImage scaledBI = new BufferedImage(screenSize.width, screenSize.height,BufferedImage.TYPE_INT_RGB);
     	Graphics2D g = scaledBI.createGraphics();
     	g.setComposite(AlphaComposite.Src);
-		g.drawImage(ImageIO.read(new File("src/img/finalBackground.png")), 0, 0, screenSize.width, screenSize.height, null);
+		g.drawImage(ImageIO.read(ResourcePath.resolve("src/img/finalBackground.png")), 0, 0, screenSize.width, screenSize.height, null);
     	g.dispose();
     	return scaledBI;
     }

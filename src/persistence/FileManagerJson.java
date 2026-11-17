@@ -1,6 +1,7 @@
 package persistence;
 
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import models.GameData;
+import models.ResourcePath;
 
 public class FileManagerJson {
 
@@ -49,7 +51,11 @@ public class FileManagerJson {
 			jsonProfile.put(TAG_HEIGHT_XSPRITE_COORDS, list.getHeightSpriteCoords());
 			jsonList.add(jsonProfile);
 		jsonfile.put(TAG_LIST, jsonList);
-		try (FileWriter file = new FileWriter(DB_PATH, false)) {
+		File dbFile = new File(DB_PATH);
+		if (dbFile.getParentFile() != null && !dbFile.getParentFile().canWrite()) {
+			return;
+		}
+		try (FileWriter file = new FileWriter(dbFile, false)) {
 			file.write(jsonfile.toJSONString());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -59,7 +65,7 @@ public class FileManagerJson {
 	public static ArrayList<GameData> read() {
 		ArrayList<GameData> list = new ArrayList<GameData>();
 		JSONParser parser = new JSONParser();
-		try (Reader reader = new FileReader(DB_PATH)) {
+		try (Reader reader = new FileReader(ResourcePath.resolve(DB_PATH))) {
 			JSONObject jsonObject = (JSONObject) parser.parse(reader);
 			JSONArray jsonList = (JSONArray) jsonObject.get(TAG_LIST);
 			Iterator<JSONObject> iterator = jsonList.iterator();

@@ -2,6 +2,7 @@ package presenters;
 
 import models.Game;
 import models.IndexColection;
+import models.ResourcePath;
 import models.SceneOBjectGroup;
 import models.Sprite;
 import views.GameWindow;
@@ -126,8 +127,10 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		addSpriteList("src/img/defeat1.png");
 		addSpriteList("src/img/defeat2.png");
 		game.setSpritesNumber(game.getSpriteSizeList().size());
-		File screeenShotFolder = new File("src/screenShoots");
-		for (int i = 0; i < screeenShotFolder.listFiles().length; i++) {
+		File screeenShotFolder = ResourcePath.resolve("src/screenShoots");
+		File[] screenFiles = screeenShotFolder.listFiles();
+		int screenCount = (screenFiles != null) ? screenFiles.length : 0;
+		for (int i = 0; i < screenCount; i++) {
 			window.addSpriteList(createSprite("src/screenShoots/screenshot "+(i+1)+".png"));	
 			game.addSpriteSizeList(extractSpriteSize("src/screenShoots/screenshot "+(i+1)+".png"));
 		}
@@ -150,8 +153,9 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 	}
 	private int extractSpriteSize(String path) {
 		if(isGif(path)) {
-			File f = new File(path);
-			return f.listFiles().length;
+			File f = ResourcePath.resolve(path);
+			File[] files = f.listFiles();
+			return (files != null) ? files.length : 1;
 		}
 		else
 			return 1;	
@@ -159,12 +163,14 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 	private Sprite createSprite(String path) throws IOException {
 		ArrayList<BufferedImage> sprite = new ArrayList<BufferedImage>();
 		if(isGif(path)){
-			File f = new File(path);
-			for (int i = 0; i < f.listFiles().length; i++) {
-				sprite.add(ImageIO.read(new File(path+"/frame-"+(i+1)+".gif")));
+			File f = ResourcePath.resolve(path);
+			File[] files = f.listFiles();
+			int count = (files != null) ? files.length : 0;
+			for (int i = 0; i < count; i++) {
+				sprite.add(ImageIO.read(ResourcePath.resolve(path+"/frame-"+(i+1)+".gif")));
 			}
 		}else 
-			sprite.add(ImageIO.read(new File(path)));
+			sprite.add(ImageIO.read(ResourcePath.resolve(path)));
 		return new Sprite(sprite,path);
 	}
 	private void mainTimer() {

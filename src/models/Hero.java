@@ -87,14 +87,14 @@ public class Hero extends GameObject{
     	spriteInvertCoords = rightInvCoords;
     	spriteNormalCoords = rightCoords;
     	try {
-    		rightInvImg = ImageIO.read(new File("src/img/jelly - Right - Inv.png"));
-    		leftInvImg = ImageIO.read(new File("src/img/jelly - Left - Inv.png"));
-    		upRightImg = ImageIO.read(new File("src/img/jelly - Up - Right.png"));
-    		downRightImg = ImageIO.read(new File("src/img/jelly - Down - Right.png"));
-    		downLeftImg = ImageIO.read(new File("src/img/jelly - Down - Left.png"));
-    		upLeftImg = ImageIO.read(new File("src/img/jelly - Up - Left.png"));
-    		leftImg = ImageIO.read(new File("src/img/jelly - Left.png"));
-    		rightImg = ImageIO.read(new File("src/img/jelly - Right.png"));
+    		rightInvImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Right - Inv.png"));
+    		leftInvImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Left - Inv.png"));
+    		upRightImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Up - Right.png"));
+    		downRightImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Down - Right.png"));
+    		downLeftImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Down - Left.png"));
+    		upLeftImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Up - Left.png"));
+    		leftImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Left.png"));
+    		rightImg = ImageIO.read(ResourcePath.resolve("src/img/jelly - Right.png"));
     		img =rightImg;
     		imgJump =rightImg;
     		imgVerticalLeft=upLeftImg;

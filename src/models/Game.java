@@ -192,7 +192,7 @@ public class Game{
 		hero.setXBeforeJump((int)gameData.getxBeforeJump());
 		hero.setYBeforeJump((int)gameData.getyBeforeJump());
 		hero.setFall(Boolean.parseBoolean(gameData.getFall()));
-		BufferedImage img = ImageIO.read(new File("src/img/jelly "+gameData.getImage()+".png"));
+		BufferedImage img = ImageIO.read(ResourcePath.resolve("src/img/jelly "+gameData.getImage()+".png"));
 		hero.setSubSprite( img.
 				getSubimage((int)gameData.getxSpriteCoords(),(int)gameData.getySpriteCoords(),
 						(int)gameData.getWidthSpriteCoords(),(int)gameData.getHeightSpriteCoords()));
@@ -275,8 +275,12 @@ public class Game{
     }
     
     public void saveSnapShot(int numberOfScreenshots) throws Exception {///main
+    	File out = new File("src/screenShoots/screenshot "+numberOfScreenshots+".png");
+    	if(out.getParentFile() == null || !out.getParentFile().canWrite()) {
+    		return;
+    	}
     	BufferedImage img = getScreenShot();
-    	ImageIO.write(img, "png", new File("src/screenShoots/screenshot "+numberOfScreenshots+".png"));
+    	ImageIO.write(img, "png", out);
     }
 	public Hero getHero() {
 		return hero;
@@ -411,10 +415,10 @@ public class Game{
 	public BufferedImage createAnimatedImage(int time,int slowdown,String path) throws IOException {
 		int gifTime;
 		BufferedImage img = null;
-		File gifFolder = new File(path);
+		File gifFolder = ResourcePath.resolve(path);
 		gifTime = (time%slowdown==0)?time/slowdown:(int)(time/slowdown);
 		int imageNumber=(gifTime %gifFolder.listFiles().length)+1;
-		img = ImageIO.read(new File(path+"/frame-"+imageNumber+".gif"));
+		img = ImageIO.read(ResourcePath.resolve(path+"/frame-"+imageNumber+".gif"));
 		return img;
 	}
 	public IndexColection createIdexCollection(int time,int slowdown,int indexSpriteList) throws IOException {
