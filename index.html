@@ -130,10 +130,14 @@
             border-color: #ef3081;
             transform: scale(0.94);
         }
-        .dpad-up    { grid-column: 2; grid-row: 1; }
-        .dpad-left  { grid-column: 1; grid-row: 2; }
-        .dpad-right { grid-column: 3; grid-row: 2; }
-        .dpad-down  { grid-column: 2; grid-row: 3; }
+        .dpad-up-left    { grid-column: 1; grid-row: 1; font-size: 16px; }
+        .dpad-up         { grid-column: 2; grid-row: 1; }
+        .dpad-up-right   { grid-column: 3; grid-row: 1; font-size: 16px; }
+        .dpad-left       { grid-column: 1; grid-row: 2; }
+        .dpad-right      { grid-column: 3; grid-row: 2; }
+        .dpad-down-left  { grid-column: 1; grid-row: 3; font-size: 16px; }
+        .dpad-down       { grid-column: 2; grid-row: 3; }
+        .dpad-down-right { grid-column: 3; grid-row: 3; font-size: 16px; }
         .action-col {
             display: flex;
             flex-direction: column;
@@ -157,14 +161,18 @@
 
     <div id="mobile-controls" aria-label="Controles táctiles">
         <div class="dpad-grid">
-            <button type="button" class="dpad-btn dpad-up" data-key="ArrowUp" data-code="38" aria-label="Arriba">&#9650;</button>
-            <button type="button" class="dpad-btn dpad-left" data-key="ArrowLeft" data-code="37" aria-label="Izquierda">&#9664;</button>
-            <button type="button" class="dpad-btn dpad-right" data-key="ArrowRight" data-code="39" aria-label="Derecha">&#9654;</button>
-            <button type="button" class="dpad-btn dpad-down" data-key="ArrowDown" data-code="40" aria-label="Abajo">&#9660;</button>
+            <button type="button" class="dpad-btn dpad-up-left" data-keys="ArrowUp:38,ArrowLeft:37" aria-label="Arriba Izquierda">&#8598;</button>
+            <button type="button" class="dpad-btn dpad-up" data-keys="ArrowUp:38" aria-label="Arriba">&#9650;</button>
+            <button type="button" class="dpad-btn dpad-up-right" data-keys="ArrowUp:38,ArrowRight:39" aria-label="Arriba Derecha">&#8599;</button>
+            <button type="button" class="dpad-btn dpad-left" data-keys="ArrowLeft:37" aria-label="Izquierda">&#9664;</button>
+            <button type="button" class="dpad-btn dpad-right" data-keys="ArrowRight:39" aria-label="Derecha">&#9654;</button>
+            <button type="button" class="dpad-btn dpad-down-left" data-keys="ArrowDown:40,ArrowLeft:37" aria-label="Abajo Izquierda">&#8601;</button>
+            <button type="button" class="dpad-btn dpad-down" data-keys="ArrowDown:40" aria-label="Abajo">&#9660;</button>
+            <button type="button" class="dpad-btn dpad-down-right" data-keys="ArrowDown:40,ArrowRight:39" aria-label="Abajo Derecha">&#8600;</button>
         </div>
         <div class="action-col">
-            <button type="button" class="dpad-btn action-btn" data-key="KeyP" data-code="80" aria-label="Pausa">Pausa</button>
-            <button type="button" class="dpad-btn action-btn" data-key="Escape" data-code="27" aria-label="Saltar">Skip</button>
+            <button type="button" class="dpad-btn action-btn" data-keys="KeyP:80" aria-label="Pausa">Pausa</button>
+            <button type="button" class="dpad-btn action-btn" data-keys="Escape:27" aria-label="Saltar">Skip</button>
         </div>
     </div>
 
@@ -224,20 +232,26 @@
         }
 
         document.querySelectorAll('.dpad-btn').forEach(function (btn) {
-            const keyName = btn.dataset.key;
-            const keyCode = parseInt(btn.dataset.code, 10);
+            const keyPairs = (btn.dataset.keys || '').split(',').map(function (entry) {
+                const parts = entry.split(':');
+                return { keyName: parts[0], keyCode: parseInt(parts[1], 10) };
+            }).filter(function (p) { return p.keyName && !isNaN(p.keyCode); });
 
             function handlePress(e) {
                 e.preventDefault();
                 unlockWebAudio();
                 btn.classList.add('active');
-                dispatchVirtualKey('keydown', keyName, keyCode);
+                keyPairs.forEach(function (p) {
+                    dispatchVirtualKey('keydown', p.keyName, p.keyCode);
+                });
             }
 
             function handleRelease(e) {
                 e.preventDefault();
                 btn.classList.remove('active');
-                dispatchVirtualKey('keyup', keyName, keyCode);
+                keyPairs.forEach(function (p) {
+                    dispatchVirtualKey('keyup', p.keyName, p.keyCode);
+                });
             }
 
             btn.addEventListener('touchstart', handlePress, { passive: false });
