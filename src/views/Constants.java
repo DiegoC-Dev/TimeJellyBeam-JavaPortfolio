@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.Toolkit;
 
 public class Constants {
+	public static final int LOGICAL_WIDTH = 1366;
+	public static final int LOGICAL_HEIGHT = 768;
 	public static final Dimension SIZE= new Dimension(500, 500);
 	public static final Dimension SCREEN_SIZE= Toolkit.getDefaultToolkit().getScreenSize();
 

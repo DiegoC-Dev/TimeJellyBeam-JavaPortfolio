@@ -62,7 +62,6 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		window.draw();
 		mainTimer();
 		viewData();
-		game.modifyFullScreenImage("src/img/GameMap.png", window.getWidth(),window.getHeight());
 		fillSpriteList();
 		initPrelude();
 		game.writeData();
@@ -611,7 +610,7 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 		if(!game.getCurrentScene().equals("load") &&
 				!game.getCurrentScene().equals("prelude") &&
 				!game.getCurrentScene().equals("introduction"))
-		game.changeButtonAndRestoreAll(e, 8);	
+		game.changeButtonAndRestoreAll(window.toLogicalMouseEvent(e), 8);	
 	}
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
@@ -628,34 +627,35 @@ public class GamePresenter implements KeyListener,MouseListener, MouseMotionList
 			advancePreludeScene();
 			return;
 		}
-		game.changeButton(e,9);
-		if(game.getNameObjectScene(e)!=null) {
-			if(game.getNameObjectScene(e).equals("start")){
+		MouseEvent logicalEvent = window.toLogicalMouseEvent(e);
+		game.changeButton(logicalEvent,9);
+		if(game.getNameObjectScene(logicalEvent)!=null) {
+			if(game.getNameObjectScene(logicalEvent).equals("start")){
 				game.setChangeScene("introduction");
 			} 
-			else if(game.getNameObjectScene(e).equals("screenshots")){	
+			else if(game.getNameObjectScene(logicalEvent).equals("screenshots")){	
 				game.setChangeScene("screenShots");
 			}
-			else if(game.getNameObjectScene(e).equals("quit")){				
+			else if(game.getNameObjectScene(logicalEvent).equals("quit")){				
 				System.exit(0);
 			}
-			else if(game.getNameObjectScene(e).equals("continue")){
+			else if(game.getNameObjectScene(logicalEvent).equals("continue")){
 				game.deleteObjectsScene();
 				game.setPause(false);
 			}
-			else if(game.getNameObjectScene(e).equals("main menu")){				
+			else if(game.getNameObjectScene(logicalEvent).equals("main menu")){				
 				game.setPause(false);
 				game.setChangeScene("menu");
-			}else if(game.getNameObjectScene(e).equals("back")){
+			}else if(game.getNameObjectScene(logicalEvent).equals("back")){
 				game.screenShotObjectsSceneBack();
-			}else if(game.getNameObjectScene(e).equals("next")){
+			}else if(game.getNameObjectScene(logicalEvent).equals("next")){
 				game.screenShotObjectsSceneNext();
 			}
-			else if(game.getNameObjectScene(e).equals("main menu win")){				
+			else if(game.getNameObjectScene(logicalEvent).equals("main menu win")){				
 				game.setChangeScene("menu");
 			}
 			
-			System.out.println(game.getNameObjectScene(e));
+			System.out.println(game.getNameObjectScene(logicalEvent));
 		}
 	}
 	@Override

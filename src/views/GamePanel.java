@@ -38,6 +38,7 @@ public class GamePanel extends JPanel {
 	private int finalTime;
 	private boolean initGame;
 	private boolean win;
+	private BufferedImage offscreenBuffer;
 	private ArrayList<Sprite> spriteList;
 	private Sprite loadSprite;
 	private IndexColection[] indexColectionList;
@@ -70,12 +71,51 @@ public class GamePanel extends JPanel {
 	}
     @Override
     public void paint(Graphics graphics) {
-    	super.paint(graphics);
+    	int panelW = getWidth();
+    	int panelH = getHeight();
+    	if(panelW <= 0 || panelH <= 0) {
+    		return;
+    	}
+    	if(offscreenBuffer == null) {
+    		offscreenBuffer = new BufferedImage(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT, BufferedImage.TYPE_INT_RGB);
+    	}
+    	Graphics2D gBuffer = offscreenBuffer.createGraphics();
+    	gBuffer.setColor(Color.BLACK);
+    	gBuffer.fillRect(0, 0, Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
     	if(draw && !initGame) 
-    		drawScene(graphics);
+    		drawScene(gBuffer);
     	else if(initGame) 
-    		drawGame(graphics);
+    		drawGame(gBuffer);
+    	gBuffer.dispose();
+
+    	Graphics2D g2d = (Graphics2D) graphics;
+    	g2d.setColor(Color.BLACK);
+    	g2d.fillRect(0, 0, panelW, panelH);
+    	double scale = Math.min((double) panelW / Constants.LOGICAL_WIDTH, (double) panelH / Constants.LOGICAL_HEIGHT);
+    	int drawW = (int) Math.round(Constants.LOGICAL_WIDTH * scale);
+    	int drawH = (int) Math.round(Constants.LOGICAL_HEIGHT * scale);
+    	int offsetX = (panelW - drawW) / 2;
+    	int offsetY = (panelH - drawH) / 2;
+    	g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    	g2d.drawImage(offscreenBuffer, offsetX, offsetY, drawW, drawH, null);
     	getToolkit().sync();    		
+    }
+
+    public MouseEvent toLogicalMouseEvent(MouseEvent e) {
+    	int panelW = getWidth();
+    	int panelH = getHeight();
+    	if(panelW <= 0 || panelH <= 0) {
+    		return e;
+    	}
+    	double scale = Math.min((double) panelW / Constants.LOGICAL_WIDTH, (double) panelH / Constants.LOGICAL_HEIGHT);
+    	int drawW = (int) Math.round(Constants.LOGICAL_WIDTH * scale);
+    	int drawH = (int) Math.round(Constants.LOGICAL_HEIGHT * scale);
+    	int offsetX = (panelW - drawW) / 2;
+    	int offsetY = (panelH - drawH) / 2;
+    	int logicalX = (int) Math.round((e.getX() - offsetX) / scale);
+    	int logicalY = (int) Math.round((e.getY() - offsetY) / scale);
+    	return new MouseEvent(e.getComponent(), e.getID(), e.getWhen(), e.getModifiersEx(),
+    			logicalX, logicalY, e.getClickCount(), e.isPopupTrigger(), e.getButton());
     }
 
 	private void drawScene(Graphics graphics) {

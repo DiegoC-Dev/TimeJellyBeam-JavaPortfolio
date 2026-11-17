@@ -14,6 +14,7 @@ import presenters.GamePresenter;
 
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -108,5 +109,8 @@ public class GameWindow extends JFrame{
 	}
 	public void setFinishLoad(boolean finishLoad) {
 		panelGame.setFinishLoad(finishLoad);
+	}
+	public MouseEvent toLogicalMouseEvent(MouseEvent e) {
+		return panelGame.toLogicalMouseEvent(e);
 	}
 }
